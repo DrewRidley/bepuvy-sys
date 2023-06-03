@@ -629,10 +629,7 @@ pub const __cpp_lib_tuple_element_t: u32 = 201402;
 pub const __cpp_lib_tuples_by_type: u32 = 201304;
 pub type std_integral_constant_value_type<_Tp> = _Tp;
 pub type std_integral_constant_type = u8;
-extern "C" {
-    #[link_name = "\u{1}value"]
-    pub static std_value: _Tp;
-}
+
 pub type std_true_type = u8;
 pub type std_false_type = u8;
 pub type std__BoolConstant = u8;
@@ -1994,7 +1991,8 @@ pub struct std___can_extract_key {
 pub struct std___can_extract_map_key {
     pub _address: u8,
 }
-pub type std__IsCharLikeType = std__And<_Pred>;
+
+
 pub type std___make_const_lvalue_ref = *mut std_remove_reference;
 pub type std___maybe_const = u8;
 pub const std_float_round_style_round_indeterminate: std_float_round_style = -1;
