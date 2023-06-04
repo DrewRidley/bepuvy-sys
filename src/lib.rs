@@ -1,3 +1,6 @@
-#[allow(non_camel_case_types)]
-
-pub mod bindings;
+pub mod Bepu {
+    extern "C" {
+        pub fn Initialize();
+        pub fn GetPlatformThreadCount() -> i32;
+    }
+}

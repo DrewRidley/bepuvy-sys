@@ -17,30 +17,7 @@ fn find_lib(filename: &str) -> Option<String> {
 }
 
 fn main() {
-    // Tell cargo to look for shared libraries in the specified directory
-
-
-    // Tell cargo to invalidate the built crate whenever the wrapper changes
-    //println!("cargo:rerun-if-changed=wrapper.h");
-
-    // The bindgen::Builder is the main entry point
-    // to bindgen, and lets you build up options for
-    // the resulting bindings.
-
-
-    //  let lib_dir = PathBuf::from(
-    //      "/Volumes/T7/Projects/scratchpad/Abomination/AbominationInterop/AbominationInterop/bin/Release/net8.0/osx.13-arm64/publish"
-    //  );
-
-    // println!("cargo:rustc-link-search={}", lib_dir.to_str().unwrap()); 
-
-    //println!("cargo:rustc-link-lib=dylib=AbominationInterop");
-
     let required_libs = [
-        //Generated with:
-        // https://github.com/dotnet/runtime/issues/70277
-        //"sfx_combined.a"
-
         "libbootstrapperdll.a",
         "libRuntime.WorkstationGC.a",
         "libeventpipe-disabled.a",
@@ -59,60 +36,54 @@ fn main() {
     }
 
     println!("cargo:rustc-link-lib=static:+verbatim=/Volumes/T7/Projects/scratchpad/Abomination/AbominationInterop/AbominationInterop/bin/Release/net8.0/osx.13-arm64/publish/AbominationInterop.a");
-        
-    
-    //Required for M1 Mac
     println!("cargo:rustc-link-lib=objc");
     println!("cargo:rustc-link-lib=swiftCore");
     println!("cargo:rustc-link-lib=swiftFoundation");
     println!("cargo:rustc-link-lib=icucore");
-    
-    println!("cargo:rustc-link-arg=_NativeAOT_StaticInitialization");
-
     println!("cargo:rustc-link-search=/usr/lib/swift");
+    println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
 
 
-    let bindings = bindgen::Builder::default()
+    // let bindings = bindgen::Builder::default()
+    //     .clang_args(&["-x", "c++"])
+    //     .clang_args(&["-std=c++14"])
 
-        .clang_args(&["-x", "c++"])
-        .clang_args(&["-std=c++14"])
+    //     //Required for MacOS apparently...
+    //     .clang_args(&["-framework", "Foundation"])
+    //     .clang_args(&["-framework", "Security"])
+    //     .clang_args(&["-framework", "GSS"])
 
-        //Required for MacOS apparently...
-        .clang_args(&["-framework", "Foundation"])
-        .clang_args(&["-framework", "Security"])
-        .clang_args(&["-framework", "GSS"])
-
-        // The input header we would like to generate
-        // bindings for.
-        .header("headers/BepuPhysics.h")
-        .header("headers/Bodies.h")
-        .header("headers/CollidableProperty.h")
-        .header("headers/Collisions.h")
-        .header("headers/Constraints.h")
-        .header("headers/Continuity.h")
-        .header("headers/Handles.h")
-        .header("headers/InteropMath.h")
-        .header("headers/PoseIntegration.h")
-        .header("headers/Shapes.h")
-        .header("headers/Statics.h")
-        .header("headers/Tree.h")
-        .header("headers/Utilities.h")
+    //     // The input header we would like to generate
+    //     // bindings for.
+    //     .header("headers/BepuPhysics.h")
+    //     .header("headers/Bodies.h")
+    //     .header("headers/CollidableProperty.h")
+    //     .header("headers/Collisions.h")
+    //     .header("headers/Constraints.h")
+    //     .header("headers/Continuity.h")
+    //     .header("headers/Handles.h")
+    //     .header("headers/InteropMath.h")
+    //     .header("headers/PoseIntegration.h")
+    //     .header("headers/Shapes.h")
+    //     .header("headers/Statics.h")
+    //     .header("headers/Tree.h")
+    //     .header("headers/Utilities.h")
 
     
 
 
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Finish the builder and generate the bindings.
-        .generate()
-        // Unwrap the Result and panic on failure.
-        .expect("Unable to generate bindings");
+    //     // Tell cargo to invalidate the built crate whenever any of the
+    //     // included header files changed.
+    //     .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+    //     // Finish the builder and generate the bindings.
+    //     .generate()
+    //     // Unwrap the Result and panic on failure.
+    //     .expect("Unable to generate bindings");
 
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    // // Write the bindings to the $OUT_DIR/bindings.rs file.
+    // let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    bindings
-        .write_to_file("src/bindings.rs")
-        .expect("Couldn't write bindings!");
+    // bindings
+    //     .write_to_file("src/bindings.rs")
+    //     .expect("Couldn't write bindings!");
 }
