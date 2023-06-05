@@ -1,4 +1,6 @@
 
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct TypedIndex {
     packed: u32
 }
@@ -17,9 +19,10 @@ impl TypedIndex {
     }
 }
 
+#[derive(Copy, Clone, Default)]
 #[repr(C)]
 pub struct InstanceHandle {
-    raw_value: i32,
+    pub raw_value: i32,
 }
 
 impl InstanceHandle {
@@ -40,10 +43,17 @@ impl InstanceHandle {
     }
 } 
 
+#[repr(C)]
+#[derive(Copy, Clone)]
 pub struct BodyHandle(pub i32);
+
+#[repr(C)]
 pub struct StaticHandle(pub i32);
+
+#[repr(C)]
 pub struct ConstraintHandle(pub i32);
 
 pub type SimulationHandle = InstanceHandle;
 pub type BufferPoolHandle = InstanceHandle;
 pub type ThreadDispatcherHandle = InstanceHandle;
+

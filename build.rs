@@ -35,7 +35,7 @@ fn main() {
         println!("cargo:rustc-link-lib=static:+verbatim={}", lib_path);
     }
 
-    println!("cargo:rustc-link-lib=static:+verbatim=/Volumes/T7/Projects/scratchpad/Abomination/AbominationInterop/AbominationInterop/bin/Release/net8.0/osx.13-arm64/publish/AbominationInterop.a");
+    println!("cargo:rustc-link-lib=static:+verbatim=/Volumes/T7/Projects/scratchpad/Abomination/AbominationInterop/AbominationInterop/bin/Debug/net8.0/osx.13-arm64/publish/AbominationInterop.a");
     println!("cargo:rustc-link-lib=objc");
     println!("cargo:rustc-link-lib=swiftCore");
     println!("cargo:rustc-link-lib=swiftFoundation");
@@ -68,9 +68,6 @@ fn main() {
     //     .header("headers/Statics.h")
     //     .header("headers/Tree.h")
     //     .header("headers/Utilities.h")
-
-    
-
 
     //     // Tell cargo to invalidate the built crate whenever any of the
     //     // included header files changed.
