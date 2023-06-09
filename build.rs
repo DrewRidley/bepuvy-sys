@@ -1,5 +1,7 @@
 use std::env;
+use std::fmt::Debug;
 use std::path::{PathBuf, Path};
+use std::process::Command;
 use walkdir::WalkDir;
 
 
@@ -35,52 +37,46 @@ fn main() {
         println!("cargo:rustc-link-lib=static:+verbatim={}", lib_path);
     }
 
-    println!("cargo:rustc-link-lib=static:+verbatim=/Volumes/T7/Projects/scratchpad/Abomination/AbominationInterop/AbominationInterop/bin/Debug/net8.0/osx.13-arm64/publish/AbominationInterop.a");
-    println!("cargo:rustc-link-lib=objc");
-    println!("cargo:rustc-link-lib=swiftCore");
-    println!("cargo:rustc-link-lib=swiftFoundation");
-    println!("cargo:rustc-link-lib=icucore");
-    println!("cargo:rustc-link-search=/usr/lib/swift");
-    println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
+    let path = "/users/drewridley/RiderProjects/Bepuvy/Bepuvy";
+    let debug = false;
 
+    let arch = "osx.13-arm64";
 
-    // let bindings = bindgen::Builder::default()
-    //     .clang_args(&["-x", "c++"])
-    //     .clang_args(&["-std=c++14"])
+    let final_path = path.to_owned() + "/bin/" + (if debug {
+        "Debug"
+    } else {
+        "Release"
+    }) + "/net8.0/" + arch + "/publish/Bepuvy.a";
 
-    //     //Required for MacOS apparently...
-    //     .clang_args(&["-framework", "Foundation"])
-    //     .clang_args(&["-framework", "Security"])
-    //     .clang_args(&["-framework", "GSS"])
+    let output = Command::new("dotnet")
+        .arg("publish")
+        .arg("/p:NativeLib=Static")
+        .arg("-p:IlcInstructionSet=apple-m1")
+        .arg("Bepuvy.csproj")
+        .arg("-c")
+        .arg(if debug {
+            "Debug"
+        } else {
+            "Release"
+        })
+        .arg("-r")
+        .arg("osx.13-arm64")
+        .arg("-f")
+        .arg("net8.0")
+        .current_dir(path)
+        .status()
+        .expect("Failed to execute command");
 
-    //     // The input header we would like to generate
-    //     // bindings for.
-    //     .header("headers/BepuPhysics.h")
-    //     .header("headers/Bodies.h")
-    //     .header("headers/CollidableProperty.h")
-    //     .header("headers/Collisions.h")
-    //     .header("headers/Constraints.h")
-    //     .header("headers/Continuity.h")
-    //     .header("headers/Handles.h")
-    //     .header("headers/InteropMath.h")
-    //     .header("headers/PoseIntegration.h")
-    //     .header("headers/Shapes.h")
-    //     .header("headers/Statics.h")
-    //     .header("headers/Tree.h")
-    //     .header("headers/Utilities.h")
-
-    //     // Tell cargo to invalidate the built crate whenever any of the
-    //     // included header files changed.
-    //     .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-    //     // Finish the builder and generate the bindings.
-    //     .generate()
-    //     // Unwrap the Result and panic on failure.
-    //     .expect("Unable to generate bindings");
-
-    // // Write the bindings to the $OUT_DIR/bindings.rs file.
-    // let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-
-    // bindings
-    //     .write_to_file("src/bindings.rs")
-    //     .expect("Couldn't write bindings!");
+    if output.success() {
+        println!("cargo:rustc-link-lib=static:+verbatim={}", final_path);
+        println!("cargo:rustc-link-lib=objc");
+        println!("cargo:rustc-link-lib=swiftCore");
+        println!("cargo:rustc-link-lib=swiftFoundation");
+        println!("cargo:rustc-link-lib=icucore");
+        println!("cargo:rustc-link-search=/usr/lib/swift");
+        println!("cargo:rustc-link-arg=-Wl,-u,_NativeAOT_StaticInitialization");
+    }
+    else {
+        panic!("Failed to build with NativeAOT: {}", output);
+    }
 }

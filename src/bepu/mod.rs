@@ -1,86 +1,144 @@
 
-pub mod handles;
-pub mod collisions;
-pub mod pose;
-pub mod constraints;
-pub mod bodies;
-pub mod tree;
-pub mod math;
-pub mod continuity;
-pub mod statics;
-pub mod shapes;
 
-use handles::*;
-use collisions::*;
-use pose::*;
-use constraints::*;
-use bodies::*;
-use math::*;
-
-use self::{statics::StaticDescription, shapes::BepuBox};
-
+#[derive(Clone, Copy, Debug)]
 #[repr(C)]
-pub struct SimAllocSize {
-    bodies: i32,
-    statics: i32,
-    islands: i32,
-    shapes_per_type: i32,
-    constraints: i32,
-    constraints_per_type: i32,
-    constraints_per_body_estimate: i32,
+pub struct Vector3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
-#[repr(C)]
-pub struct SolveDesc {
-    pub vel_iter_count: i32,
-    pub subtep_count: i32,
-    pub fallback_batch_thresh: i32,
-    pub vel_iter_scheduler: Option<extern "C" fn(i32) -> i32>,
-}
-
-impl Default for SimAllocSize {
-    fn default() -> Self {
-        Self {
-            bodies: 4906,
-            statics: 4906,
-            islands: 16,
-            shapes_per_type: 128,
-            constraints: 16384,
-            constraints_per_type: 256,
-            constraints_per_body_estimate: 8,
-        }
+impl Vector3 {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Vector3 {x, y, z}
     }
+}
+
+#[derive(Debug)]
+#[repr(C)]
+pub struct Quaternion {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+
+impl Quaternion{ 
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Quaternion {x, y, z, w}
+    }
+}
+
+#[derive(Debug)]
+#[repr(C)]
+pub struct RigidPose {
+    pub position: Vector3,
+    pub orientation: Quaternion,
+}
+
+
+pub fn setup_pyramid() {
+    unsafe {
+        SetupPyramidDemo();
+    };
+}
+
+pub fn timestep() {
+    unsafe {
+        Timestep();
+    };
+}
+
+pub fn spawn_cube(pos: Vector3) -> i32 {
+    unsafe {
+        return SpawnCube(pos);
+    };
+}
+
+pub fn get_pose(handle: i32) -> RigidPose {
+    unsafe {
+        return GetBodyPose(handle);
+    };
 }
 
 
 extern "C" {
-    pub fn Initialize();
-    pub fn GetPlatformThreadCount() -> i32;
+    fn SetupPyramidDemo();
 
-    pub fn CreateBufferPool(minBlockAllocSize: i32, expectedUsedSlots: i32) -> BufferPoolHandle;
+    fn Timestep();
 
-    pub fn CreateThreadDispatcher(threadCount: i32, threadPoolAllocationBlocks: i32) -> ThreadDispatcherHandle;
+    fn SpawnCube(pos: Vector3) -> i32;
 
-    pub fn AddStatic(handle: SimulationHandle, desc: StaticDescription)-> TypedIndex;
-
-    pub fn AddBox(handle: SimulationHandle, boxy: BepuBox) -> TypedIndex;
-
-    pub fn AddBody(handle: SimulationHandle, desc: BodyDescription) -> BodyHandle;
-
-    pub fn AddBody_Debug(handle: SimulationHandle);
-
-    pub fn Destroy();
-
-    pub fn Timestep(handle: SimulationHandle, dt: f32, dispatcher: ThreadDispatcherHandle);
-
-    pub fn GetBodyDynamics(handle: SimulationHandle, body: BodyHandle) -> &'static BodyDynamics;
-
-    pub fn CreateSimulation(
-        pool: BufferPoolHandle, 
-        narrow_callbacks: NarrowPhaseCallbacks,
-        pose_callbacks: PoseIntegratorCallbacks,
-        solve_desc: SolveDesc,
-        sim_alloc_size: SimAllocSize
-    ) -> SimulationHandle;
+    fn GetBodyPose(handle: i32) -> RigidPose;
 }
 
+/*
+        const int pyramidCount = 40;
+        for (int pyramidIndex = 0; pyramidIndex < pyramidCount; ++pyramidIndex)
+        {
+            const int rowCount = 20;
+            for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex)
+            {
+                int columnCount = rowCount - rowIndex;
+                for (int columnIndex = 0; columnIndex < columnCount; ++columnIndex)
+                {
+                    sim.Bodies.Add(BodyDescription.CreateDynamic(new Vector3(
+                            (-columnCount * 0.5f + columnIndex) * boxShape.Width,
+                            (rowIndex + 0.5f) * boxShape.Height,
+                            (pyramidIndex - pyramidCount * 0.5f) * (boxShape.Length + 4)),
+                        boxInertia, boxIndex, 0.01f));
+                }
+            }
+        }
+ */
+
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use crate::bepu::{SpawnCube, Vector3, Timestep, GetBodyPose};
+
+    use super::{SetupPyramidDemo};
+
+
+    #[test] 
+    fn pyramid_demo() {
+        unsafe {
+            SetupPyramidDemo();
+
+            let mut handles = vec![];
+
+            let mut total_cube_count = 0;
+
+            const PYRAMID_COUNT: i32 = 40;
+            for pyramid_index in 0..PYRAMID_COUNT {
+                const ROW_COUNT: i32 = 20;
+                for row_index in 0..ROW_COUNT {
+                    let column_count = ROW_COUNT - row_index;
+                    for column_index in 0..column_count {
+                        total_cube_count += 1;
+                        handles.push(SpawnCube(
+                            Vector3::new(
+                                (-column_count as f32 * 0.5 + column_index as f32) * 1.0,
+                                (row_index as f32 + 0.5) * 1.0,
+                                (pyramid_index as f32 - PYRAMID_COUNT as f32 * 0.5) * (1.0 + 4.0),
+                        )));
+                    }
+                }
+            }
+
+            println!("Created {} cubes", total_cube_count);
+
+            let start_time = std::time::Instant::now();
+
+            for _ in 0..1000 {
+                Timestep();
+            }
+            
+            //println!("Average timestep took: {:?}", avg_timestep / 100);
+            println!("Total elapsed time: {:?}", start_time.elapsed());
+            println!("Per timestep {:?}", start_time.elapsed() / 1000);
+        }
+    }
+}
