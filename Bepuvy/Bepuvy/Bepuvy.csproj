@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
+        <PublishAot>true</PublishAot>
+        <NativeLib>Shared</NativeLib>
+        <IlcOptimizationPreference>speed</IlcOptimizationPreference>
+        <SelfContained>true</SelfContained>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="BepuPhysics" Version="2.5.0-beta.13" />
+        <PackageReference Include="Microsoft.DotNet.ILCompiler; runtime.osx-arm64.Microsoft.DotNet.ILCompiler" Version="8.0.0-preview.6.23313.22" />
+    </ItemGroup>
+</Project>

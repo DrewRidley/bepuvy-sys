@@ -1,2 +1,7 @@
 /target
 /Cargo.lock
+bin/
+obj/
+.idea/
+.DS_Store
+dist/
