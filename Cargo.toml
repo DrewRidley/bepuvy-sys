@@ -11,6 +11,6 @@ crate-type = ["rlib"]
 
 [build_dependencies]
 which = "*"
-tempfile = "*"
+bindgen = "0.65.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

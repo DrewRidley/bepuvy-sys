@@ -1,5 +1,4 @@
 use std::{path::PathBuf, process::Command};
-use tempfile::tempdir;
 
 //Lets watch for changes on ANY of the .cs files and rebuild the bindings.
 fn register_change_detection() {
@@ -27,7 +26,7 @@ fn register_change_detection() {
 fn install_dotnet() -> PathBuf {
     let target_dir = std::env::var("OUT_DIR").expect("OUT_DIR environment variable not set");
     let target_path = PathBuf::from(target_dir);
-    let install_dir = target_path.join("dotnet");
+    let mut install_dir = target_path.join("dotnet");
 
     #[cfg(target_os = "windows")]
     {
@@ -75,6 +74,8 @@ fn install_dotnet() -> PathBuf {
         }
     }
 
+    install_dir.push("dotnet");
+
     println!("Dotnet installed successfully at {}", install_dir.display());
     install_dir
 }
@@ -92,7 +93,7 @@ fn main() {
     // If we don't have dotnet, we have to install it.
     let out_dir_dotnet = {
         let mut path = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR not set"));
-        path.push("dotnet");
+        path.push("dotnet/dotnet");
         path
     };
 
@@ -104,7 +105,7 @@ fn main() {
         install_dotnet()
     };
 
-    let compilation_output = Command::new(dotnet_path.join("dotnet")) // Use the dotnet path from install_dotnet
+    let compilation_output = Command::new(dotnet_path) // Use the dotnet path from install_dotnet
         .arg("publish")
         .arg("/p:NativeLib=Static")
         .arg("-p:EnableNativeEventPipe=false")
@@ -133,7 +134,7 @@ fn main() {
                 );
             }
         }
-        Err(e) => panic!("NativeAOT compilation failed: {}", e),
+        Err(e) => panic!("NativeAOT compilation failed: {:?}", e),
     }
 
     let ext = match std::env::consts::OS {
@@ -181,8 +182,31 @@ fn main() {
 
     println!("cargo:rustc-link-arg=-ldl");
     println!("cargo:rustc-link-arg=-lm");
-    println!("cargo:rustc-link-arg=-Wl,-no_fixup_chains");
-    println!("cargo:rustc-link-arg=-framework");
-    println!("cargo:rustc-link-arg=Foundation");
+    //println!("cargo:rustc-link-arg=-Wl,-no_fixup_chains");
+    // println!("cargo:rustc-link-arg=-framework");
+    // println!("cargo:rustc-link-arg=Foundation");
     println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
+
+    // // The bindgen::Builder is the main entry point
+    // // to bindgen, and lets you build up options for
+    // // the resulting bindings.
+    // let bindings = bindgen::Builder::default()
+    //     // The input header we would like to generate
+    //     // bindings for.
+    //     .header("/home/drewr/Documents/Projects/scratchpad/Abomination/AbominationInterop/BepuPhysicsCPP/BepuPhysics.hpp")
+    //     // Tell cargo to invalidate the built crate whenever any of the
+    //     // included header files changed.
+    //     // .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+    //     // Finish the builder and generate the bindingsecify C++14 standard if needed
+    //     .generate()
+    //     // Unwrap the Result and panic on failure.
+    //     .expect("Unable to generate bindings");
+
+    // panic!("Successfully generated bindings...");
+
+    // // Write the bindings to the $OUT_DIR/bindings.rs file.
+    // let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    // bindings
+    //     .write_to_file(out_path.join("bindings.rs"))
+    //     .expect("Couldn't write bindings!");
 }

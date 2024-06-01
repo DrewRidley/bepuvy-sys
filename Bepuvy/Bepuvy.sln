@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bepuvy", "Bepuvy\Bepuvy.csproj", "{F29547DA-21DE-4404-9490-2436912B9737}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Generator.csproj", "{2339859D-C36E-4C9B-981A-56975CDE92F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{F29547DA-21DE-4404-9490-2436912B9737}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F29547DA-21DE-4404-9490-2436912B9737}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F29547DA-21DE-4404-9490-2436912B9737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2339859D-C36E-4C9B-981A-56975CDE92F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2339859D-C36E-4C9B-981A-56975CDE92F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2339859D-C36E-4C9B-981A-56975CDE92F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2339859D-C36E-4C9B-981A-56975CDE92F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
