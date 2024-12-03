@@ -7,10 +7,10 @@ pub mod handles;
 pub mod interop_math;
 pub mod pose_integration;
 
-mod shapes;
-mod statics;
-mod tree;
-mod utilities;
+pub mod shapes;
+pub mod statics;
+pub mod tree;
+pub mod utilities;
 
 pub mod functions;
 

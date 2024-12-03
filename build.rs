@@ -1,56 +1,70 @@
-use std::{path::PathBuf, process::Command};
+use std::{
+    env,
+    path::PathBuf,
+    process::{Command, Output},
+};
 
-//Lets watch for changes on ANY of the .cs files and rebuild the bindings.
-fn register_change_detection() {
-    let cs_dir = std::fs::read_dir("./Bepuvy/Bepuvy").expect("Unable to read cs directory");
-
-    for file in cs_dir.filter(|file| {
-        if let Ok(f) = file {
-            if let Ok(t) = f.file_type() {
-                return t.is_file() && f.file_name().to_str().unwrap().ends_with(".cs");
-            }
-
-            return false;
-        }
-
-        false
-    }) {
-        //For each CS file, we need to register it with the watcher.
-        println!(
-            "cargo:rerun-if-changed=Bepuvy/Bepuvy/{}",
-            file.unwrap().file_name().to_str().unwrap()
-        );
+fn check_command_output(output: &Output, context: &str) {
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        panic!("Failed {context}:\nstdout: {stdout}\nstderr: {stderr}");
     }
 }
 
+fn get_home_dir() -> PathBuf {
+    env::var("HOME")
+        .or_else(|_| env::var("USERPROFILE"))
+        .map(PathBuf::from)
+        .expect("Could not determine home directory")
+}
+
+fn find_native_aot_version() -> String {
+    let csproj_content = std::fs::read_to_string("./Bepuvy/Bepuvy/Bepuvy.csproj")
+        .expect("Failed to read .csproj file");
+
+    for line in csproj_content.lines() {
+        if line.contains("Microsoft.DotNet.ILCompiler") {
+            if let Some(version_str) = line
+                .split("Version=\"")
+                .nth(1)
+                .and_then(|s| s.split('\"').next())
+            {
+                return version_str.to_string();
+            }
+        }
+    }
+
+    panic!("Could not find Microsoft.DotNet.ILCompiler version in .csproj");
+}
+
 fn install_dotnet() -> PathBuf {
-    let target_dir = std::env::var("OUT_DIR").expect("OUT_DIR environment variable not set");
+    let target_dir = env::var("OUT_DIR").expect("Failed to get OUT_DIR");
     let target_path = PathBuf::from(target_dir);
-    let mut install_dir = target_path.join("dotnet");
+    let install_dir = target_path.join("dotnet");
 
     #[cfg(target_os = "windows")]
     {
         let install_script = format!(
             r#"
             $installDir = "{}"
+            $ErrorActionPreference = "Stop"
             Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
             .\dotnet-install.ps1 -InstallDir $installDir -NoPath
             "#,
             install_dir.display()
         );
 
-        let status = Command::new("powershell")
+        let output = Command::new("powershell")
             .arg("-NoProfile")
             .arg("-ExecutionPolicy")
             .arg("Bypass")
             .arg("-Command")
             .arg(install_script)
-            .status()
-            .expect("failed to execute powershell script");
+            .output()
+            .expect("Failed to execute powershell command");
 
-        if !status.success() {
-            panic!("Failed to install Dotnet on Windows!");
-        }
+        check_command_output(&output, "installing .NET");
     }
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -58,30 +72,50 @@ fn install_dotnet() -> PathBuf {
         let install_script = format!(
             r#"
             INSTALL_DIR="{}"
-            curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --install-dir $INSTALL_DIR --no-path
+            curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --install-dir "$INSTALL_DIR" --no-path
             "#,
             install_dir.display()
         );
 
-        let status = Command::new("sh")
+        let output = Command::new("sh")
             .arg("-c")
             .arg(install_script)
-            .status()
-            .expect("failed to execute shell script");
+            .output()
+            .expect("Failed to execute shell command");
 
-        if !status.success() {
-            panic!("Failed to install Dotnet on Linux/Mac!");
-        }
+        check_command_output(&output, "installing .NET");
     }
 
-    install_dir.push("dotnet");
+    let dotnet_path = install_dir.join("dotnet");
+    dotnet_path
+}
 
-    println!("Dotnet installed successfully at {}", install_dir.display());
-    install_dir
+fn register_change_detection() {
+    let cs_dir = std::fs::read_dir("./Bepuvy/Bepuvy").expect("Unable to read cs directory");
+
+    for entry in cs_dir.filter_map(|e| e.ok()) {
+        if let Ok(ft) = entry.file_type() {
+            if ft.is_file()
+                && entry
+                    .file_name()
+                    .to_str()
+                    .map(|s| s.ends_with(".cs"))
+                    .unwrap_or(false)
+            {
+                println!(
+                    "cargo:rerun-if-changed=Bepuvy/Bepuvy/{}",
+                    entry.file_name().to_str().unwrap()
+                );
+            }
+        }
+    }
 }
 
 fn main() {
-    let arch = match (std::env::consts::OS, std::env::consts::ARCH) {
+    println!("cargo:warning=Build script starting");
+
+    // Get target architecture
+    let arch = match (env::consts::OS, env::consts::ARCH) {
         ("macos", "aarch64") => "osx-arm64",
         ("windows", "x86_64") => "win-x64",
         ("linux", "x86_64") => "linux-x64",
@@ -90,12 +124,9 @@ fn main() {
 
     register_change_detection();
 
-    // If we don't have dotnet, we have to install it.
-    let out_dir_dotnet = {
-        let mut path = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR not set"));
-        path.push("dotnet/dotnet");
-        path
-    };
+    // Find .NET and set up environment
+    let out_dir_dotnet =
+        PathBuf::from(env::var("OUT_DIR").expect("Failed to get OUT_DIR")).join("dotnet/dotnet");
 
     let dotnet_path = if which::which("dotnet").is_ok() {
         PathBuf::from("dotnet")
@@ -105,7 +136,8 @@ fn main() {
         install_dotnet()
     };
 
-    let compilation_output = Command::new(dotnet_path) // Use the dotnet path from install_dotnet
+    // Build the project
+    let output = Command::new(&dotnet_path)
         .arg("publish")
         .arg("/p:NativeLib=Static")
         .arg("-p:EnableNativeEventPipe=false")
@@ -117,42 +149,41 @@ fn main() {
         .arg("-p:InvariantGlobalization=true")
         .arg("--use-current-runtime")
         .current_dir("./Bepuvy/Bepuvy")
-        //Output to the dist directory so we don't have to discriminate Debug/Release folders
         .arg("-o")
         .arg("dist")
         .arg("-r")
         .arg(arch)
-        .output();
+        .output()
+        .expect("Failed to execute dotnet command");
 
-    match compilation_output {
-        Ok(output) => {
-            let utf = String::from_utf8(output.stdout).unwrap();
-            if utf.contains("error") {
-                panic!(
-                    "NativeAOT had one or more compilation errors within Bepuvy: \n{}",
-                    utf
-                );
-            }
-        }
-        Err(e) => panic!("NativeAOT compilation failed: {:?}", e),
+    check_command_output(&output, "building Bepuvy");
+
+    // Handle library extension and renaming
+    let ext = if cfg!(windows) { ".lib" } else { ".a" };
+    let old_name = format!("./Bepuvy/Bepuvy/dist/Bepuvy{}", ext);
+    let new_name = format!("./Bepuvy/Bepuvy/dist/libBepuvy{}", ext);
+
+    std::fs::rename(&old_name, &new_name).expect("Failed to rename library file");
+
+    // Find NativeAOT version and set up linking
+    let nativeaot_version = find_native_aot_version();
+    let home_dir = get_home_dir();
+
+    let aot_base = home_dir
+        .join(".nuget")
+        .join("packages")
+        .join(format!("runtime.{arch}.microsoft.dotnet.ilcompiler"))
+        .join(&nativeaot_version);
+
+    if !aot_base.exists() {
+        panic!(
+            "NativeAOT package not found at expected location: {}",
+            aot_base.display()
+        );
     }
 
-    let ext = match std::env::consts::OS {
-        "windows" => ".lib",
-        _ => ".a",
-    };
-
-    //Rename the library because the linker assumes prefix 'lib'.
-    std::fs::rename(
-        format!("./Bepuvy/Bepuvy/dist/Bepuvy{}", ext),
-        format!("./Bepuvy/Bepuvy/dist/libBepuvy{}", ext),
-    )
-    .expect("Failed to rename output library!");
-
-    //Now that we finished compilation, lets link the AOT libraries.
-    let aot_base = "/users/drewridley/.nuget/packages/runtime.osx-arm64.microsoft.dotnet.ilcompiler/8.0.0-preview.6.23313.22";
-    println!("cargo:rustc-link-search={}/sdk", aot_base);
-    println!("cargo:rustc-link-search={}/framework", aot_base);
+    println!("cargo:rustc-link-search={}/sdk", aot_base.display());
+    println!("cargo:rustc-link-search={}/framework", aot_base.display());
 
     let libs = vec![
         "bootstrapperdll",
@@ -169,44 +200,15 @@ fn main() {
         println!("cargo:rustc-link-lib=static:-bundle,+whole-archive={lib}");
     }
 
-    let dist_dir = std::env::current_dir()
-        .expect("Failed to get current dir")
-        .to_str()
-        .unwrap()
-        .to_owned()
-        + "/Bepunvy/Bepuvy/dist";
+    let dist_dir = env::current_dir()
+        .expect("Failed to get current directory")
+        .join("Bepunvy/Bepuvy/dist");
 
-    println!("cargo:rustc-link-search={dist_dir}");
+    println!("cargo:rustc-link-search={}", dist_dir.display());
     println!("cargo:rustc-link-lib=static:-bundle,+whole-archive=Bepuvy");
     println!("cargo:rustc-link-lib=c++");
 
     println!("cargo:rustc-link-arg=-ldl");
     println!("cargo:rustc-link-arg=-lm");
-    //println!("cargo:rustc-link-arg=-Wl,-no_fixup_chains");
-    // println!("cargo:rustc-link-arg=-framework");
-    // println!("cargo:rustc-link-arg=Foundation");
     println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
-
-    // // The bindgen::Builder is the main entry point
-    // // to bindgen, and lets you build up options for
-    // // the resulting bindings.
-    // let bindings = bindgen::Builder::default()
-    //     // The input header we would like to generate
-    //     // bindings for.
-    //     .header("/home/drewr/Documents/Projects/scratchpad/Abomination/AbominationInterop/BepuPhysicsCPP/BepuPhysics.hpp")
-    //     // Tell cargo to invalidate the built crate whenever any of the
-    //     // included header files changed.
-    //     // .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-    //     // Finish the builder and generate the bindingsecify C++14 standard if needed
-    //     .generate()
-    //     // Unwrap the Result and panic on failure.
-    //     .expect("Unable to generate bindings");
-
-    // panic!("Successfully generated bindings...");
-
-    // // Write the bindings to the $OUT_DIR/bindings.rs file.
-    // let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
-    // bindings
-    //     .write_to_file(out_path.join("bindings.rs"))
-    //     .expect("Couldn't write bindings!");
 }
