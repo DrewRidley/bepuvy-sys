@@ -186,7 +186,7 @@ fn main() {
     println!("cargo:rustc-link-search={}/framework", aot_base.display());
 
     let mut libs = vec![
-        "bootstrapperdll",
+        // "bootstrapperdll",
         "Runtime.WorkstationGC",
         "eventpipe-disabled",
         "System.Native",
@@ -203,6 +203,11 @@ fn main() {
     for lib in libs {
         println!("cargo:rustc-link-lib=static:-bundle,+whole-archive={lib}");
     }
+
+    println!("cargo:rustc-link-lib=static:-bundle,+whole-archive,+verbatim=libbootstrapperdll.o");
+    println!(
+        "cargo:rustc-link-lib=static:-bundle,+whole-archive,+verbatim=libstandalonegc-enabled.a"
+    );
 
     let dist_dir = env::current_dir()
         .expect("Failed to get current directory")
