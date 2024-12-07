@@ -1,5 +1,6 @@
 /// Represents an index with an associated type packed into a single integer.
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct TypedIndex {
     /// Bit packed representation of the typed index.
     pub packed: u32,

@@ -185,7 +185,7 @@ fn main() {
     println!("cargo:rustc-link-search={}/sdk", aot_base.display());
     println!("cargo:rustc-link-search={}/framework", aot_base.display());
 
-    let libs = vec![
+    let mut libs = vec![
         "bootstrapperdll",
         "Runtime.WorkstationGC",
         "eventpipe-disabled",
@@ -196,13 +196,17 @@ fn main() {
         "System.Security.Cryptography.Native.OpenSsl",
     ];
 
+    if arch == "osx-arm64" {
+        libs.push("System.Security.Cryptography.Native.Apple");
+    };
+
     for lib in libs {
         println!("cargo:rustc-link-lib=static:-bundle,+whole-archive={lib}");
     }
 
     let dist_dir = env::current_dir()
         .expect("Failed to get current directory")
-        .join("Bepunvy/Bepuvy/dist");
+        .join("Bepuvy/Bepuvy/dist");
 
     println!("cargo:rustc-link-search={}", dist_dir.display());
     println!("cargo:rustc-link-lib=static:-bundle,+whole-archive=Bepuvy");
