@@ -51,6 +51,7 @@ impl InstanceHandle {
 pub struct BodyHandle {
     pub value: i32,
 }
+
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct StaticHandle {

@@ -219,5 +219,4 @@ fn main() {
 
     println!("cargo:rustc-link-arg=-ldl");
     println!("cargo:rustc-link-arg=-lm");
-    println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
 }

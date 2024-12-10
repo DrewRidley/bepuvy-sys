@@ -1,3 +1,5 @@
+use glam::{Quat, Vec3};
+
 /// A 3D vector.
 #[repr(C)]
 pub struct Vector3 {
@@ -12,6 +14,18 @@ impl Vector3 {
     }
     pub fn zero() -> Self {
         Self::new(0.0, 0.0, 0.0)
+    }
+}
+
+impl From<Vec3> for Vector3 {
+    fn from(value: Vec3) -> Self {
+        Self::new(value.x, value.y, value.z)
+    }
+}
+
+impl Into<Vec3> for Vector3 {
+    fn into(self) -> Vec3 {
+        Vec3::new(self.x, self.y, self.z)
     }
 }
 
@@ -36,6 +50,18 @@ impl Quaternion {
     }
     pub fn identity() -> Self {
         Self::new(0.0, 0.0, 0.0, 1.0)
+    }
+}
+
+impl From<Quat> for Quaternion {
+    fn from(value: Quat) -> Self {
+        Self::new(value.x, value.y, value.z, value.w)
+    }
+}
+
+impl Into<Quat> for Quaternion {
+    fn into(self) -> Quat {
+        Quat::from_array([self.x, self.y, self.z, self.w])
     }
 }
 

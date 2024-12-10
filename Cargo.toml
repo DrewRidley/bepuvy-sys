@@ -10,7 +10,11 @@ build = "build.rs"
 [lib]
 crate-type = ["rlib"]
 
-[build_dependencies]
+[dependencies]
+glam = "0.29.2"
+
+
+[build-dependencies]
 which = "*"
 bindgen = "0.65.1"
 
