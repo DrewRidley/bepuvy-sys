@@ -144,7 +144,7 @@ fn main() {
         .arg(if arch == "osx-arm64" {
             "-p:IlcInstructionSet=apple-m1"
         } else {
-            "-p:IlcInstructionSet=x86-x64-v4"
+            "-p:IlcInstructionSet=x86-x64-v3"
         })
         .arg("-p:InvariantGlobalization=true")
         .arg("--use-current-runtime")
@@ -187,6 +187,7 @@ fn main() {
 
     let mut libs = vec![
         // "bootstrapperdll",
+        "Runtime.VxsortEnabled",
         "Runtime.WorkstationGC",
         "eventpipe-disabled",
         "System.Native",
@@ -217,7 +218,9 @@ fn main() {
     println!("cargo:rustc-link-lib=static:-bundle,+whole-archive=Bepuvy");
     println!("cargo:rustc-link-lib=c++");
 
-    println!("cargo:rustc-link-arg=-ldl");
-    println!("cargo:rustc-link-arg=-lm");
-    println!("cargo:rustc-link-args=-Wl,-u,_NativeAOT_StaticInitialization");
+    #[cfg(any(target_os = "linux"))]
+    {
+        println!("cargo:rustc-link-arg=-z");
+        println!("cargo:rustc-link-arg=nostart-stop-gc");
+    }
 }

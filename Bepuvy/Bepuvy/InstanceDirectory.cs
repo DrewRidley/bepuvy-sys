@@ -1,10 +1,13 @@
-﻿using BepuUtilities.Memory;
+using BepuUtilities.Memory;
 using System.Diagnostics;
+
+namespace Bepuvy;
+
 /// <summary>
 /// Registers handles for GC-tracked types to be exposed through the C API.
 /// </summary>
 /// <remarks>GC handles are not directly exposed; instead, an integer representation is used as a handle and is used to look up the GC-managed instance.</remarks>
-public class InstanceDirectory<T> where T : class
+public class InstanceDirectory<T> where T : class, IDisposable
 {
     struct DirectoryEntry
     {
@@ -34,7 +37,7 @@ public class InstanceDirectory<T> where T : class
     {
         get
         {
-            if (index < 0 || index > instances.Length)
+            if (index >= 0 && index < instances.Length)
                 return instances[index].Instance;
             return null;
         }
@@ -84,11 +87,11 @@ public class InstanceDirectory<T> where T : class
                 throw new ArgumentException("Handle does not match the type of this instance directory.");
             if (handle.Index < 0 || handle.Index > instances.Length)
                 throw new ArgumentOutOfRangeException("Handle points to an index outside of the instance directory.");
-            if (handle.Version != instances[handle.TypeIndex].Version)
+            if (handle.Version != instances[handle.Index].Version)
                 throw new ArgumentException("Handle is out of date. Is a handle being used after being removed?");
             if (instances[handle.Index].Instance == null)
                 throw new ArgumentException("There is no instance associated with this handle.");
-            instances[handle.Index].Instance = null;
+            instances[handle.Index].Instance = null!;
             pool.Return(handle.Index);
         }
     }

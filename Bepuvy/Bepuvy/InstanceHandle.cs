@@ -1,4 +1,7 @@
 using System.Diagnostics;
+
+namespace Bepuvy;
+
 /// <summary>
 /// Points to an instance in an instance directory.
 /// </summary>

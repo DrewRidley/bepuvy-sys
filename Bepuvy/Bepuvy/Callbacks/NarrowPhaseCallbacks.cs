@@ -3,6 +3,7 @@ using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Bepuvy;
 
 namespace AbominationInterop;
 

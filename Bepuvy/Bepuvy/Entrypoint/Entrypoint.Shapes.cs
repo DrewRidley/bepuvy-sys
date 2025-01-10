@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace AbominationInterop;
+namespace Bepuvy;
 
 public static partial class Entrypoints
 {
@@ -15,8 +15,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="sphere">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddSphere))]
-    public unsafe static TypedIndex AddSphere([TypeName(SimulationName)] InstanceHandle simulationHandle, Sphere sphere)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddSphere")]
+    public static TypedIndex AddSphere([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Sphere sphere)
     {
         return simulations[simulationHandle].Shapes.Add(sphere);
     }
@@ -26,8 +26,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="capsule">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddCapsule))]
-    public unsafe static TypedIndex AddCapsule([TypeName(SimulationName)] InstanceHandle simulationHandle, Capsule capsule)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddCapsule")]
+    public static TypedIndex AddCapsule([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Capsule capsule)
     {
         return simulations[simulationHandle].Shapes.Add(capsule);
     }
@@ -37,8 +37,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="box">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddBox))]
-    public unsafe static TypedIndex AddBox([TypeName(SimulationName)] InstanceHandle simulationHandle, Box box)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddBox")]
+    public static TypedIndex AddBox([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Box box)
     {
         return simulations[simulationHandle].Shapes.Add(box);
     }
@@ -48,8 +48,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="triangle">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddTriangle))]
-    public unsafe static TypedIndex AddTriangle([TypeName(SimulationName)] InstanceHandle simulationHandle, Triangle triangle)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddTriangle")]
+    public static TypedIndex AddTriangle([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Triangle triangle)
     {
         return simulations[simulationHandle].Shapes.Add(triangle);
     }
@@ -59,8 +59,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="cylinder">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddCylinder))]
-    public unsafe static TypedIndex AddCylinder([TypeName(SimulationName)] InstanceHandle simulationHandle, Cylinder cylinder)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddCylinder")]
+    public static TypedIndex AddCylinder([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Cylinder cylinder)
     {
         return simulations[simulationHandle].Shapes.Add(cylinder);
     }
@@ -70,8 +70,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="convexHull">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddConvexHull))]
-    public unsafe static TypedIndex AddConvexHull([TypeName(SimulationName)] InstanceHandle simulationHandle, ConvexHull convexHull)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddConvexHull")]
+    public static TypedIndex AddConvexHull([TypeName("SimulationHandle")] InstanceHandle simulationHandle, ConvexHull convexHull)
     {
         return simulations[simulationHandle].Shapes.Add(convexHull);
     }
@@ -81,8 +81,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="bigCompound">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddCompound))]
-    public unsafe static TypedIndex AddCompound([TypeName(SimulationName)] InstanceHandle simulationHandle, Compound bigCompound)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddCompound")]
+    public static TypedIndex AddCompound([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Compound bigCompound)
     {
         return simulations[simulationHandle].Shapes.Add(bigCompound);
     }
@@ -92,8 +92,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="bigCompound">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddBigCompound))]
-    public unsafe static TypedIndex AddBigCompound([TypeName(SimulationName)] InstanceHandle simulationHandle, BigCompound bigCompound)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddBigCompound")]
+    public static TypedIndex AddBigCompound([TypeName("SimulationHandle")] InstanceHandle simulationHandle, BigCompound bigCompound)
     {
         return simulations[simulationHandle].Shapes.Add(bigCompound);
     }
@@ -103,8 +103,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to add the shape to.</param>
     /// <param name="mesh">Shape to add to the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(AddMesh))]
-    public unsafe static TypedIndex AddMesh([TypeName(SimulationName)] InstanceHandle simulationHandle, Mesh mesh)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.AddMesh")]
+    public static TypedIndex AddMesh([TypeName("SimulationHandle")] InstanceHandle simulationHandle, Mesh mesh)
     {
         return simulations[simulationHandle].Shapes.Add(mesh);
     }
@@ -114,8 +114,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape to remove from the simulation.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(RemoveShape))]
-    public unsafe static void RemoveShape([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.RemoveShape")]
+    public static void RemoveShape([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         simulations[simulationHandle].Shapes.Remove(shape);
     }
@@ -127,8 +127,8 @@ public static partial class Entrypoints
     /// <param name="bufferPoolHandle">Buffer pool to return shape resources to, if any.</param>
     /// <param name="shape">Shape to remove from the simulation.</param>
     /// <remarks>The same buffer pool must be used for both allocation and deallocation.</remarks>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(RemoveAndDestroyShape))]
-    public unsafe static void RemoveAndDestroyShape([TypeName(SimulationName)] InstanceHandle simulationHandle, [TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.RemoveAndDestroyShape")]
+    public static void RemoveAndDestroyShape([TypeName("SimulationHandle")] InstanceHandle simulationHandle, [TypeName("BufferPoolHandle")] InstanceHandle bufferPoolHandle, TypedIndex shape)
     {
         simulations[simulationHandle].Shapes.RemoveAndDispose(shape, bufferPools[bufferPoolHandle]);
     }
@@ -140,8 +140,8 @@ public static partial class Entrypoints
     /// <param name="bufferPoolHandle">Buffer pool to return shape resources to, if any.</param>
     /// <param name="shape">Shape to remove from the simulation.</param>
     /// <remarks>The same buffer pool must be used for both allocation and deallocation.</remarks>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(RemoveAndDestroyShapeRecursively))]
-    public unsafe static void RemoveAndDestroyShapeRecursively([TypeName(SimulationName)] InstanceHandle simulationHandle, [TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.RemoveAndDestroyShapeRecursively")]
+    public static void RemoveAndDestroyShapeRecursively([TypeName("SimulationHandle")] InstanceHandle simulationHandle, [TypeName("BufferPoolHandle")] InstanceHandle bufferPoolHandle, TypedIndex shape)
     {
         simulations[simulationHandle].Shapes.RecursivelyRemoveAndDispose(shape, bufferPools[bufferPoolHandle]);
     }
@@ -152,8 +152,8 @@ public static partial class Entrypoints
     /// <param name="bufferPoolHandle">Buffer pool to allocate resources from for the compound's acceleration structures.</param>
     /// <param name="points">Points in the convex hull.</param>
     /// <param name="centerOfMass">Center of mass computed for the hull and subtracted from all the points in the points used for the final shape.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(CreateConvexHull))]
-    public unsafe static ConvexHull CreateConvexHull([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, [TypeName("Buffer<Vector3>")] Buffer<Vector3> points, Vector3* centerOfMass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.CreateConvexHull")]
+    public unsafe static ConvexHull CreateConvexHull([TypeName("SimulationHandle")] InstanceHandle bufferPoolHandle, [TypeName("Buffer<Vector3>")] Buffer<Vector3> points, Vector3* centerOfMass)
     {
         ConvexHullHelper.CreateShape(points, bufferPools[bufferPoolHandle], out *centerOfMass, out var hull);
         return hull;
@@ -164,8 +164,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="bufferPoolHandle">Buffer pool to return resources to. Must be the same pool that resources were allocated from.</param>
     /// <param name="convexHull">Convex hull to destroy.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(DestroyConvexHull))]
-    public unsafe static void DestroyConvexHull([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, ConvexHull* convexHull)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.DestroyConvexHull")]
+    public unsafe static void DestroyConvexHull([TypeName("SimulationHandle")] InstanceHandle bufferPoolHandle, ConvexHull* convexHull)
     {
         convexHull->Dispose(bufferPools[bufferPoolHandle]);
     }
@@ -175,8 +175,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="bufferPoolHandle">Buffer pool to return resources to. Must be the same pool that resources were allocated from.</param>
     /// <param name="compound">Compound to destroy.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(DestroyCompound))]
-    public unsafe static void DestroyCompound([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, Compound* compound)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.DestroyCompound")]
+    public unsafe static void DestroyCompound([TypeName("SimulationHandle")] InstanceHandle bufferPoolHandle, Compound* compound)
     {
         compound->Dispose(bufferPools[bufferPoolHandle]);
     }
@@ -187,8 +187,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to which the shapes referenced by the compound children belong.</param>
     /// <param name="bufferPoolHandle">Buffer pool to allocate resources from for the compound's acceleration structures.</param>
     /// <param name="children">Children of the compound.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(CreateBigCompound))]
-    public unsafe static BigCompound CreateBigCompound([TypeName(SimulationName)] InstanceHandle simulationHandle, [TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.CreateBigCompound")]
+    public static BigCompound CreateBigCompound([TypeName("SimulationHandle")] InstanceHandle simulationHandle, [TypeName("BufferPool")] InstanceHandle bufferPoolHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children)
     {
         return new BigCompound(children, simulations[simulationHandle].Shapes, bufferPools[bufferPoolHandle]);
     }
@@ -198,8 +198,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="bufferPoolHandle">Buffer pool to return resources to. Must be the same pool that resources were allocated from.</param>
     /// <param name="bigCompound">Big compound to destroy.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(DestroyBigCompound))]
-    public unsafe static void DestroyBigCompound([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, BigCompound* bigCompound)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.DestroyBigCompound")]
+    public static unsafe void DestroyBigCompound([TypeName("SimulationHandle")] InstanceHandle bufferPoolHandle, BigCompound* bigCompound)
     {
         bigCompound->Dispose(bufferPools[bufferPoolHandle]);
     }
@@ -211,8 +211,8 @@ public static partial class Entrypoints
     /// <param name="triangles">Triangles composing the mesh.</param>
     /// <param name="scale">Scale of the mesh.</param>
     /// <remarks>This uses a pretty old sweep builder. Large meshes will take a while. There are ways to do this much faster if required; see https://github.com/bepu/bepuphysics2/blob/master/Demos/DemoMeshHelper.cs#L186.</remarks>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(CreateMesh))]
-    public unsafe static Mesh CreateMesh([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, [TypeName("Buffer<Triangle>")] Buffer<Triangle> triangles, Vector3 scale)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.Create")]
+    public static Mesh CreateMesh([TypeName("BufferPoolHandle")] InstanceHandle bufferPoolHandle, [TypeName("Buffer<Triangle>")] Buffer<Triangle> triangles, Vector3 scale)
     {
         return new Mesh(triangles, scale, bufferPools[bufferPoolHandle]);
     }
@@ -222,8 +222,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="bufferPoolHandle">Buffer pool to return resources to. Must be the same pool that resources were allocated from.</param>
     /// <param name="mesh">Mesh to destroy.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(DestroyMesh))]
-    public unsafe static void DestroyMesh([TypeName(BufferPoolName)] InstanceHandle bufferPoolHandle, Mesh* mesh)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.Destroy")]
+    public unsafe static void DestroyMesh([TypeName("BufferPoolHandle")] InstanceHandle bufferPoolHandle, Mesh* mesh)
     {
         mesh->Dispose(bufferPools[bufferPoolHandle]);
     }
@@ -234,8 +234,8 @@ public static partial class Entrypoints
     /// <param name="sphere">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeSphereInertia))]
-    public unsafe static BodyInertia ComputeSphereInertia(Sphere sphere, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Sphere.ComputeInertia")]
+    public static BodyInertia ComputeSphereInertia(Sphere sphere, float mass)
     {
         return sphere.ComputeInertia(mass);
     }
@@ -246,8 +246,8 @@ public static partial class Entrypoints
     /// <param name="capsule">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeCapsuleInertia))]
-    public unsafe static BodyInertia ComputeCapsuleInertia(Capsule capsule, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Capsule.ComputeInertia")]
+    public static BodyInertia ComputeCapsuleInertia(Capsule capsule, float mass)
     {
         return capsule.ComputeInertia(mass);
     }
@@ -258,8 +258,8 @@ public static partial class Entrypoints
     /// <param name="box">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeBoxInertia))]
-    public unsafe static BodyInertia ComputeBoxInertia(Box box, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Box.ComputeInertia")]
+    public static BodyInertia ComputeBoxInertia(Box box, float mass)
     {
         return box.ComputeInertia(mass);
     }
@@ -270,8 +270,8 @@ public static partial class Entrypoints
     /// <param name="triangle">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeTriangleInertia))]
-    public unsafe static BodyInertia ComputeTriangleInertia(Triangle triangle, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Triangle.ComputeInertia")]
+    public static BodyInertia ComputeTriangleInertia(Triangle triangle, float mass)
     {
         return triangle.ComputeInertia(mass);
     }
@@ -282,8 +282,8 @@ public static partial class Entrypoints
     /// <param name="cylinder">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeCylinderInertia))]
-    public unsafe static BodyInertia ComputeCylinderInertia(Cylinder cylinder, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Cylinder.ComputeInertia")]
+    public static BodyInertia ComputeCylinderInertia(Cylinder cylinder, float mass)
     {
         return cylinder.ComputeInertia(mass);
     }
@@ -294,8 +294,8 @@ public static partial class Entrypoints
     /// <param name="convexHull">Shape to compute the inertia of.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeConvexHullInertia))]
-    public unsafe static BodyInertia ComputeConvexHullInertia(ConvexHull convexHull, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "ConvexHull.ComputeInertia")]
+    public static BodyInertia ComputeConvexHullInertia(ConvexHull convexHull, float mass)
     {
         return convexHull.ComputeInertia(mass);
     }
@@ -306,8 +306,8 @@ public static partial class Entrypoints
     /// <param name="convex">Index of a convex to calculate the inertia for.</param>
     /// <param name="mass">Mass to use in the inertia calculation.</param>
     /// <returns>Inertia of the shape. If the shape index was not a convex, this returns a zeroed inverse inertia tensor.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeConvexInertia))]
-    public unsafe static BodyInertia ComputeConvexInertia([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex convex, float mass)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.ComputeConvexInertia")]
+    public static BodyInertia ComputeConvexInertia([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex convex, float mass)
     {
         if (simulations[simulationHandle].Shapes[convex.Type] is IConvexShapeBatch convexBatch)
         {
@@ -322,8 +322,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to which the shapes referenced by the compound children belong.</param>
     /// <param name="children">Children of the compound.</param>
     /// <param name="childMasses">Masses of the children composing the compound.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeCompoundInertia))]
-    public unsafe static BodyInertia ComputeCompoundInertia([TypeName(SimulationName)] InstanceHandle simulationHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children, [TypeName("Buffer<float>")] Buffer<float> childMasses)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.ComputeCompoundInertia")]
+    public static BodyInertia ComputeCompoundInertia([TypeName("SimulationHandle")] InstanceHandle simulationHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children, [TypeName("Buffer<float>")] Buffer<float> childMasses)
     {
         return CompoundBuilder.ComputeInertia(children, childMasses, simulations[simulationHandle].Shapes);
     }
@@ -335,8 +335,8 @@ public static partial class Entrypoints
     /// <param name="children">Children of the compound.</param>
     /// <param name="childMasses">Masses of the children composing the compound.</param>
     /// <param name="centerOfMass">Computed center of mass that was subtracted from the position of compound children.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeCompoundInertiaWithRecentering))]
-    public unsafe static BodyInertia ComputeCompoundInertiaWithRecentering([TypeName(SimulationName)] InstanceHandle simulationHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children, [TypeName("Buffer<float>")] Buffer<float> childMasses, Vector3* centerOfMass)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.ComputeCompoundInertiaWithRecentering")]
+    public static unsafe BodyInertia ComputeCompoundInertiaWithRecentering([TypeName("SimulationHandle")] InstanceHandle simulationHandle, [TypeName("Buffer<CompoundChild>")] Buffer<CompoundChild> children, [TypeName("Buffer<float>")] Buffer<float> childMasses, Vector3* centerOfMass)
     {
         return CompoundBuilder.ComputeInertia(children, childMasses, simulations[simulationHandle].Shapes, out *centerOfMass);
     }
@@ -346,8 +346,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="mesh">Mesh to compute the inertia of.</param>
     /// <param name="mass">Mass of the mesh.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeOpenMeshInertia))]
-    public unsafe static BodyInertia ComputeOpenMeshInertia(Mesh mesh, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.ComputeOpenInertia")]
+    public static BodyInertia ComputeOpenMeshInertia(Mesh mesh, float mass)
     {
         return mesh.ComputeOpenInertia(mass);
     }
@@ -357,8 +357,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="mesh">Mesh to compute the inertia of.</param>
     /// <param name="mass">Mass of the mesh.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeClosedMeshInertia))]
-    public unsafe static BodyInertia ComputeClosedMeshInertia(Mesh mesh, float mass)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.ComputeClosedInertia")]
+    public static BodyInertia ComputeClosedMeshInertia(Mesh mesh, float mass)
     {
         return mesh.ComputeClosedInertia(mass);
     }
@@ -368,8 +368,9 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="mesh">Mesh to compute the inertia of.</param>
     /// <param name="mass">Mass of the mesh.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeOpenMeshInertiaWithRecentering))]
-    public unsafe static BodyInertia ComputeOpenMeshInertiaWithRecentering(Mesh mesh, float mass, Vector3* centerOfMass)
+    /// <param name="centerOfMass">The center of mass offset relative to the mesh coordinate system.</param>
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.ComputeOpenInertiaWithRecentering")]
+    public static unsafe BodyInertia ComputeOpenMeshInertiaWithRecentering(Mesh mesh, float mass, Vector3* centerOfMass)
     {
         return mesh.ComputeOpenInertia(mass, out *centerOfMass);
     }
@@ -379,8 +380,9 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="mesh">Mesh to compute the inertia of.</param>
     /// <param name="mass">Mass of the mesh.</param>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(ComputeClosedMeshInertiaWithRecentering))]
-    public unsafe static BodyInertia ComputeClosedMeshInertiaWithRecentering(Mesh mesh, float mass, Vector3* centerOfMass)
+    /// <param name="centerOfMass">The center of mass offset relative to the mesh coordinate system.</param>
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Mesh.ComputeClosedInertiaWithRecentering")]
+    public static unsafe BodyInertia ComputeClosedMeshInertiaWithRecentering(Mesh mesh, float mass, Vector3* centerOfMass)
     {
         return mesh.ComputeClosedInertia(mass, out *centerOfMass);
     }
@@ -391,8 +393,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetSphereShapeData))]
-    public unsafe static Sphere* GetSphereShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.GetSphereData")]
+    public static unsafe Sphere* GetSphereShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Sphere*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Sphere>(shape.Index));
     }
@@ -403,8 +405,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetCapsuleShapeData))]
-    public unsafe static Capsule* GetCapsuleShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.GetCapsuleData")]
+    public static unsafe Capsule* GetCapsuleShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Capsule*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Capsule>(shape.Index));
     }
@@ -414,9 +416,8 @@ public static partial class Entrypoints
     /// </summary>
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
-    /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetBoxShapeData))]
-    public unsafe static Box* GetBoxShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.GetBoxData")]
+    public static unsafe Box* GetBoxShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Box*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Box>(shape.Index));
     }
@@ -427,8 +428,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetTriangleShapeData))]
-    public unsafe static Triangle* GetTriangleShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.GetTriangleData")]
+    public unsafe static Triangle* GetTriangleShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Triangle*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Triangle>(shape.Index));
     }
@@ -439,8 +440,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetCylinderShapeData))]
-    public unsafe static Cylinder* GetCylinderShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.GetCapsuleCylinderData")]
+    public static unsafe Cylinder* GetCylinderShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Cylinder*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Cylinder>(shape.Index));
     }
@@ -451,8 +452,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetConvexHullShapeData))]
-    public unsafe static ConvexHull* GetConvexHullShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.GetConvexHullData")]
+    public unsafe static ConvexHull* GetConvexHullShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (ConvexHull*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<ConvexHull>(shape.Index));
     }
@@ -463,8 +464,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetCompoundShapeData))]
-    public unsafe static Compound* GetCompoundShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.GetCompoundData")]
+    public static unsafe Compound* GetCompoundShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Compound*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Compound>(shape.Index));
     }
@@ -475,8 +476,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetBigCompoundShapeData))]
-    public unsafe static BigCompound* GetBigCompoundShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.GetBigCompoundData")]
+    public static unsafe BigCompound* GetBigCompoundShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (BigCompound*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<BigCompound>(shape.Index));
     }
@@ -487,8 +488,8 @@ public static partial class Entrypoints
     /// <param name="simulationHandle">Handle of the simulation to remove the shape from.</param>
     /// <param name="shape">Shape reference to request from the simulation.</param>
     /// <returns>Pointer to the shape's data in the simulation's shapes buffers.</returns>
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = FunctionNamePrefix + nameof(GetMeshShapeData))]
-    public unsafe static Mesh* GetMeshShapeData([TypeName(SimulationName)] InstanceHandle simulationHandle, TypedIndex shape)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "Simulation.Shapes.GetMeshData")]
+    public static unsafe Mesh* GetMeshShapeData([TypeName("SimulationHandle")] InstanceHandle simulationHandle, TypedIndex shape)
     {
         return (Mesh*)Unsafe.AsPointer(ref simulations[simulationHandle].Shapes.GetShape<Mesh>(shape.Index));
     }
