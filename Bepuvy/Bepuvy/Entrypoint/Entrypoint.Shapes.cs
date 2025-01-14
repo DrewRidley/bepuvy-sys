@@ -199,7 +199,7 @@ public static partial class Entrypoints
     /// <param name="bufferPoolHandle">Buffer pool to return resources to. Must be the same pool that resources were allocated from.</param>
     /// <param name="bigCompound">Big compound to destroy.</param>
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)], EntryPoint = "Simulation.Shapes.DestroyBigCompound")]
-    public static unsafe void DestroyBigCompound([TypeName("SimulationHandle")] InstanceHandle bufferPoolHandle, BigCompound* bigCompound)
+    public static unsafe void DestroyBigCompound([TypeName("BufferPoolHandle")] InstanceHandle bufferPoolHandle, BigCompound* bigCompound)
     {
         bigCompound->Dispose(bufferPools[bufferPoolHandle]);
     }

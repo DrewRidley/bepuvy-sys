@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using BepuPhysics;
+using BepuPhysics.Collidables;
+using BepuPhysics.Constraints;
 using BepuUtilities;
 
 namespace Bepuvy.Callbacks;
@@ -78,6 +80,7 @@ public unsafe struct PoseIntegratorCallbacks<TAngularConservationMode, TUnconstr
 
     public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt, ref BodyVelocityWide velocity)
     {
+        
         var integrateVelocity = (delegate* unmanaged<InstanceHandle, Vector<int>*, Vector3Wide*, QuaternionWide*, BodyInertiaWide*, Vector<int>*, int, Vector<float>*, BodyVelocityWide*, void*, void>) IntegrateVelocityFunction;
         integrateVelocity(Simulation, &bodyIndices, &position, &orientation, &localInertia, &integrationMask, workerIndex, &dt, (BodyVelocityWide*)Unsafe.AsPointer(ref velocity), Callback.Callback);
     }

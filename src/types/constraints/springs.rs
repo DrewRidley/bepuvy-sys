@@ -1,3 +1,7 @@
+use std::simd::Simd;
+
+use crate::types::WIDEST_LANE;
+
 /// Represents the constant PI * 2
 pub const TWO_PI: f32 = std::f32::consts::PI * 2.0;
 
@@ -8,6 +12,12 @@ pub struct SpringSettings {
     pub angular_frequency: f32,
     /// Twice the ratio of the spring's actual damping to its critical damping.
     pub twice_damping_ratio: f32,
+}
+
+#[repr(C)]
+pub struct SpringSettingsWide {
+    angular_frequency: Simd<f32, WIDEST_LANE>,
+    twice_damping_ratio: Simd<f32, WIDEST_LANE>,
 }
 
 impl SpringSettings {

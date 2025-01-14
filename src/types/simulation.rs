@@ -1,34 +1,8 @@
-pub mod bodies;
-pub mod collidable_property;
-pub mod collisions;
-pub mod constraints;
-pub mod continuity;
-pub mod handles;
-pub mod interop_math;
-pub mod pose_integration;
-
-pub mod shapes;
-pub mod statics;
-pub mod tree;
-pub mod utilities;
-
-pub mod functions;
-
-#[cfg(target_feature = "avx512f")]
-pub const WIDEST_LANE: usize = 16;
-
-#[cfg(all(target_feature = "sse2", not(target_feature = "avx512f")))]
-pub const WIDEST_LANE: usize = 8;
-
-#[cfg(not(any(target_feature = "avx512f", target_feature = "sse2")))]
-pub const WIDEST_LANE: usize = 4; // Fallback for systems without AVX512F or SSE2
-
-#[repr(C)]
-pub enum SIMDWidth {
-    SIMD128,
-    SIMD256,
-    SIMD512,
-}
+use super::{
+    body::{BodyActivity, BodyConstraintReference, BodyDynamics, Collidable},
+    handles::BodyHandle,
+    utilities::{Buffer, QuickList},
+};
 
 /// Defines properties of the solver
 #[repr(C)]
@@ -139,10 +113,6 @@ pub struct BodyMemoryLocation {
     /// Index of the body within its owning set.
     pub index: i32,
 }
-
-use bodies::*;
-use handles::*;
-use utilities::*;
 
 /// Stores a group of bodies- either the set of active bodies, or the bodies involved in an inactive simulation island.
 #[repr(C)]

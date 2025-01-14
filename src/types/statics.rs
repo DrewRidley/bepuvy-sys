@@ -1,6 +1,8 @@
-use super::continuity::*;
-use super::handles::*;
-use super::interop_math::*;
+use super::{
+    ccd::ContinuousDetection,
+    handles::TypedIndex,
+    math::scalar::{Quaternion, RigidPose, Vector3},
+};
 
 /// Describes the properties of a static object. When added to a simulation, static objects can collide but have no velocity and will not move in response to forces.
 #[repr(C)]

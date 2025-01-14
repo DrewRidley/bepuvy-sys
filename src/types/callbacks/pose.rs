@@ -1,10 +1,12 @@
-use super::bodies::*;
-use super::handles::*;
-use super::interop_math::*;
-use super::shapes::Vector3Wide;
-use std::simd::LaneCount;
+use std::simd::Mask;
 use std::simd::Simd;
-use std::simd::SupportedLaneCount;
+
+use crate::types::handles::SimulationHandle;
+use crate::types::math::simd::BodyInertiaWide;
+use crate::types::math::simd::BodyVelocityWide;
+use crate::types::math::simd::QuaternionWide;
+use crate::types::math::simd::Vector3Wide;
+use crate::types::WIDEST_LANE;
 
 /// Defines how a pose integrator should handle angular velocity integration.
 #[repr(C)]
@@ -20,10 +22,7 @@ pub enum AngularIntegrationMode {
 
 /// Defines pose integrator state and callbacks.
 #[repr(C)]
-pub struct PoseIntegratorCallbacks<const N: usize>
-where
-    LaneCount<N>: SupportedLaneCount,
-{
+pub struct PoseIntegratorCallbacks {
     /// How the pose integrator should handle angular velocity integration.
     pub angular_integration_mode: AngularIntegrationMode,
     /// Whether the integrator should use only one step for unconstrained bodies when using a substepping solver.
@@ -67,13 +66,14 @@ where
     /// * `velocity`: Velocity of the body to be updated by this callback.
     pub integrate_velocity: unsafe extern "C" fn(
         simulation: SimulationHandle,
-        body_index: *mut Simd<i32, N>,
-        position: *mut Vector3Wide<N>,
-        orientation: *mut Quaternion,
-        local_inertia: *mut BodyInertia,
+        body_index: *const Simd<i32, WIDEST_LANE>,
+        position: *mut Vector3Wide,
+        orientation: *mut QuaternionWide,
+        local_inertia: *mut BodyInertiaWide,
+        mask: *const Mask<i32, WIDEST_LANE>,
         worker_index: i32,
-        dt: f32,
-        velocity: *mut BodyVelocity,
+        dt: Simd<f32, WIDEST_LANE>,
+        velocity: *mut BodyVelocityWide,
         data: *mut (),
     ),
 }

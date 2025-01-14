@@ -1,6 +1,8 @@
-use super::continuity::*;
-use super::handles::*;
-use super::interop_math::*;
+use super::{
+    ccd::ContinuousDetection,
+    handles::{ConstraintHandle, TypedIndex},
+    math::scalar::{RigidPose, Symmetric3x3, Vector3},
+};
 
 /// Description of a collidable used by a body living in the broad phase and able to generate collision pairs.
 /// Collidables with a `ShapeIndex` that points to nothing (a default constructed `TypedIndex`) are not capable of colliding with anything.
