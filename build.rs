@@ -187,7 +187,7 @@ fn main() {
 
     let mut libs = vec![
         // "bootstrapperdll",
-        "Runtime.VxsortEnabled",
+        //"Runtime.VxsortEnabled",
         "Runtime.WorkstationGC",
         "eventpipe-disabled",
         "System.Native",

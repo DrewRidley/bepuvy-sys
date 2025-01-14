@@ -23,6 +23,19 @@ pub struct SolveDescription {
     pub velocity_iteration_scheduler: Option<fn(i32) -> i32>,
 }
 
+impl Default for SolveDescription {
+    fn default() -> Self {
+        // Refer to BepuPhysics examples to better understand what these defaults are and why they were chosen.
+        Self {
+            velocity_iteration_count: 8,
+            // By default we don't have substepping.
+            substep_count: 1,
+            fallback_batch_threshold: 128,
+            velocity_iteration_scheduler: None,
+        }
+    }
+}
+
 impl SolveDescription {
     /// Creates a solve description.
     ///
@@ -101,6 +114,23 @@ impl SimulationAllocationSizes {
             constraints,
             constraints_per_type_batch,
             constraint_count_per_body_estimate,
+        }
+    }
+}
+
+impl Default for SimulationAllocationSizes {
+    fn default() -> Self {
+        // These defaults were picked out of the bepu examples.
+        // Feel free to read the documentation to better understand these values, but they are effectively just hints,
+        // similar to Vec::with_capacity() to reduce re-allocs on initial creation of the simulation.
+        Self {
+            bodies: 4096,
+            statics: 4096,
+            islands: 4096,
+            shapes_per_type: 128,
+            constraints: 4096,
+            constraints_per_type_batch: 128,
+            constraint_count_per_body_estimate: 6,
         }
     }
 }
