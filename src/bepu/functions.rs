@@ -3,18 +3,25 @@ use super::{
     pose_integration::*, shapes::*, statics::*, utilities::*, *,
 };
 
+#[cfg(target_feature = "avx512f")]
+pub const WIDEST_LANE: usize = 16;
+
+#[cfg(all(target_feature = "sse2", not(target_feature = "avx512f")))]
+pub const WIDEST_LANE: usize = 8;
+
+#[cfg(not(any(target_feature = "avx512f", target_feature = "sse2")))]
+pub const WIDEST_LANE: usize = 4; // Fallback for systems without AVX512F or SSE2
+
 extern "C" {
-    /// Initializes the interop structures.
-    pub fn Initialize();
-    /// Destroys all resources created through the interop API and releases interop structures.
-    pub fn Destroy();
-    pub fn GetSIMDWidth() -> SIMDWidth;
+    #[link_name = "Utils.GetSIMDWidth"]
+    pub fn get_simd_width() -> SIMDWidth;
     /// Gets the number of threads exposed by the operating system on this platform. Cores with SMT can show as having multiple threads.
     ///
     /// # Returns
     ///
     /// Number of threads exposed by the operating system on this platform.
-    pub fn GetPlatformThreadCount() -> i32;
+    #[link_name = "Utils.GetPlatformThreadCount"]
+    pub fn get_platform_thread_count() -> i32;
     /// Creates a new buffer pool.
     ///
     /// # Arguments
@@ -24,7 +31,8 @@ extern "C" {
     /// Buffers will be suballocated from blocks.
     /// * `expected_used_slot_count_per_pool`: Number of suballocations to preallocate reference space for.
     /// This does not preallocate actual blocks, just the space to hold references that are waiting in the pool.
-    pub fn CreateBufferPool(
+    #[link_name = "BufferPool.Create"]
+    pub fn create_buffer_pool(
         minimum_block_allocation_size: i32,
         expected_used_slot_count_per_pool: i32,
     ) -> BufferPoolHandle;
@@ -33,13 +41,15 @@ extern "C" {
     /// # Arguments
     ///
     /// * `handle`: Buffer pool to clear.
-    pub fn ClearBufferPool(handle: BufferPoolHandle);
+    #[link_name = "BufferPool.Clear"]
+    pub fn clear_buffer_pool(handle: BufferPoolHandle);
     /// Releases all allocations held by the buffer pool and releases the buffer pool reference. The handle is invalidated.
     ///
     /// # Arguments
     ///
     /// * `handle`: Buffer pool to destroy.
-    pub fn DestroyBufferPool(handle: BufferPoolHandle);
+    #[link_name = "BufferPool.Destroy"]
+    pub fn destroy_buffer_pool(handle: BufferPoolHandle);
     /// Allocates a buffer from the buffer pool of the given size.
     ///
     /// # Arguments
@@ -50,7 +60,8 @@ extern "C" {
     /// # Returns
     ///
     /// Allocated buffer.
-    pub fn Allocate(buffer_pool_handle: BufferPoolHandle, size_in_bytes: i32) -> ByteBuffer;
+    #[link_name = "BufferPool.Allocate"]
+    pub fn allocate(buffer_pool_handle: BufferPoolHandle, size_in_bytes: i32) -> ByteBuffer;
     /// Allocates a buffer from the buffer pool with at least the given size.
     ///
     /// # Arguments
@@ -61,7 +72,11 @@ extern "C" {
     /// # Returns
     ///
     /// Allocated buffer.
-    pub fn AllocateAtLeast(buffer_pool_handle: BufferPoolHandle, size_in_bytes: i32) -> ByteBuffer;
+    #[link_name = "BufferPool.AllocateAtLeast"]
+    pub fn allocate_at_least(
+        buffer_pool_handle: BufferPoolHandle,
+        size_in_bytes: i32,
+    ) -> ByteBuffer;
     /// Resizes a buffer from the buffer pool to the given size, reallocating if necessary.
     ///
     /// # Arguments
@@ -70,7 +85,8 @@ extern "C" {
     /// * `buffer`: Buffer to resize.
     /// * `new_size_in_bytes`: Target size of the buffer to allocate in bytes.
     /// * `copy_count`: Number of bytes to copy from the old buffer into the new buffer.
-    pub fn Resize(
+    #[link_name = "BufferPool.Resize"]
+    pub fn resize(
         buffer_pool_handle: BufferPoolHandle,
         buffer: *mut ByteBuffer,
         new_size_in_bytes: i32,
@@ -84,7 +100,8 @@ extern "C" {
     /// * `buffer`: Buffer to resize.
     /// * `target_size_in_bytes`: Target size of the buffer to allocate in bytes.
     /// * `copy_count`: Number of bytes to copy from the old buffer into the new buffer.
-    pub fn ResizeToAtLeast(
+    #[link_name = "BufferPool.ResizeToAtLeast"]
+    pub fn resize_to_at_least(
         buffer_pool_handle: BufferPoolHandle,
         buffer: *mut ByteBuffer,
         target_size_in_bytes: i32,
@@ -96,21 +113,24 @@ extern "C" {
     ///
     /// * `buffer_pool_handle`: Buffer pool to return the buffer to.
     /// * `buffer`: Buffer to return to the pool.
-    pub fn Deallocate(buffer_pool_handle: BufferPoolHandle, buffer: *mut ByteBuffer);
+    #[link_name = "BufferPool.Deallocate"]
+    pub fn deallocate(buffer_pool_handle: BufferPoolHandle, buffer: *mut ByteBuffer);
     /// Returns a buffer to the buffer pool by its id.
     ///
     /// # Arguments
     ///
     /// * `buffer_pool_handle`: Buffer pool to return the buffer to.
     /// * `buffer_id`: Id of the buffer to return to the pool.
-    pub fn DeallocateById(buffer_pool_handle: BufferPoolHandle, buffer_id: i32);
+    #[link_name = "BufferPool.DeallocateId"]
+    pub fn deallocate_by_id(buffer_pool_handle: BufferPoolHandle, buffer_id: i32);
     /// Creates a new thread dispatcher.
     ///
     /// # Arguments
     ///
     /// * `thread_count`: Number of threads to use within the thread dispatcher.
     /// * `thread_pool_allocation_block_size`: Minimum size in bytes of blocks allocated in per-thread buffer pools. Allocations requiring more space can result in larger block sizes, but no pools will allocate smaller blocks.
-    pub fn CreateThreadDispatcher(
+    #[link_name = "ThreadDispatcher.Create"]
+    pub fn create_thread_dispatcher(
         thread_count: i32,
         thread_pool_allocation_block_size: i32,
     ) -> ThreadDispatcherHandle;
@@ -119,13 +139,16 @@ extern "C" {
     /// # Arguments
     ///
     /// * `handle`: Thread dispatcher to destroy.
-    pub fn DestroyThreadDispatcher(handle: ThreadDispatcherHandle);
+    #[link_name = "ThreadDispatcher.Destroy"]
+    pub fn destroy_thread_dispatcher(handle: ThreadDispatcherHandle);
     /// Releases all resources held by a thread dispatcher and invalidates its handle.
     ///
     /// # Arguments
     ///
     /// * `handle`: Thread dispatcher to check the thread count of.
-    pub fn GetThreadCount(handle: ThreadDispatcherHandle) -> i32;
+    #[link_name = "ThreadDispatcher.GetThreadCount"]
+    pub fn get_thread_count(handle: ThreadDispatcherHandle) -> i32;
+
     /// Creates a new simulation.
     ///
     /// # Arguments
@@ -139,19 +162,23 @@ extern "C" {
     /// # Returns
     ///
     /// The created simulation.
-    pub fn CreateSimulation(
+    #[link_name = "Simulation.Create"]
+    pub fn create_simulation(
         buffer_pool: BufferPoolHandle,
         narrow_phase_callbacks: NarrowPhaseCallbacks,
-        pose_integrator_callbacks: PoseIntegratorCallbacks,
+        pose_integrator_callbacks: PoseIntegratorCallbacks<WIDEST_LANE>,
         solve_description_interop: SolveDescription,
         initial_allocation_sizes: SimulationAllocationSizes,
     ) -> SimulationHandle;
-    pub fn DestroySimulation(handle: SimulationHandle);
-    pub fn AddBody(
+    #[link_name = "Simulation.Destroy"]
+    pub fn destroy_simulation(handle: SimulationHandle);
+    #[link_name = "Simulation.AddBody"]
+    pub fn add_body(
         simulation_handle: SimulationHandle,
         body_description: BodyDescription,
     ) -> BodyHandle;
-    pub fn RemoveBody(simulation_handle: SimulationHandle, body_handle: BodyHandle);
+    #[link_name = "Simulation.RemoveBody"]
+    pub fn remove_body(simulation_handle: SimulationHandle, body_handle: BodyHandle);
     /// Gets a pointer to the dynamic state associated with a body. Includes pose, velocity, and inertia.
     ///
     /// # Arguments
@@ -166,7 +193,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This is a direct pointer. The memory location associated with a body can move other bodies are removed from the simulation; do not hold a pointer beyond the point where it may be invalidated.
-    pub fn GetBodyDynamics(
+    #[link_name = "Simulation.GetBodyDynamics"]
+    pub fn get_body_dynamics(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
     ) -> *mut BodyDynamics;
@@ -184,7 +212,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This is a direct pointer. The memory location associated with a body can move if other bodies are removed from the simulation; do not hold a pointer beyond the point where it may be invalidated.
-    pub fn GetBodyCollidable(
+    #[link_name = "Simulation.GetBodyCollidable"]
+    pub fn get_body_collidable(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
     ) -> *mut Collidable;
@@ -202,7 +231,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This is a direct pointer. The memory location associated with a body can move if other bodies are removed from the simulation; do not hold a pointer beyond the point where it may be invalidated.
-    pub fn GetBodyActivity(
+    #[link_name = "Simulation.GetBodyActivity"]
+    pub fn get_body_activity(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
     ) -> *mut BodyActivity;
@@ -220,7 +250,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This is a direct pointer. The memory location associated with a body can move if other bodies are removed from the simulation; do not hold a pointer beyond the point where it may be invalidated.
-    pub fn GetBodyConstraints(
+    #[link_name = "Simulation.GetBodyConstraints"]
+    pub fn get_body_constraints(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
     ) -> *mut QuickList<BodyConstraintReference>;
@@ -234,7 +265,8 @@ extern "C" {
     /// # Returns
     ///
     /// Description of a body.
-    pub fn GetBodyDescription(
+    #[link_name = "Simulation.GetBodyDescription"]
+    pub fn get_body_description(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
     ) -> BodyDescription;
@@ -245,16 +277,19 @@ extern "C" {
     /// * `simulation_handle`: Simulation to pull a body's state from.
     /// * `body_handle`: Body handle to pull data about.
     /// * `description`: Description to apply to the body.
-    pub fn ApplyBodyDescription(
+    #[link_name = "Simulation.ApplyBodyDescription"]
+    pub fn apply_body_description(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
         description: BodyDescription,
     );
-    pub fn AddStatic(
+    #[link_name = "Simulation.AddStatic"]
+    pub fn add_static(
         simulation_handle: SimulationHandle,
         static_description: StaticDescription,
     ) -> StaticHandle;
-    pub fn RemoveStatic(simulation_handle: SimulationHandle, static_handle: StaticHandle);
+    #[link_name = "Simulation.RemoveStatic"]
+    pub fn remove_static(simulation_handle: SimulationHandle, static_handle: StaticHandle);
     /// Gets a pointer to data associated with a static.
     ///
     /// # Arguments
@@ -269,7 +304,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This is a direct pointer. The memory location associated with a static can move if other statics are removed from the simulation; do not hold a pointer beyond the point where it may be invalidated.
-    pub fn GetStatic(
+    #[link_name = "Simulation.GetStatic"]
+    pub fn get_static(
         simulation_handle: SimulationHandle,
         static_handle: StaticHandle,
     ) -> *mut Static;
@@ -283,7 +319,8 @@ extern "C" {
     /// # Returns
     ///
     /// Description of the static..
-    pub fn GetStaticDescription(
+    #[link_name = "Simulation.GetStaticDescription"]
+    pub fn get_static_description(
         simulation_handle: SimulationHandle,
         static_handle: StaticHandle,
     ) -> StaticDescription;
@@ -293,11 +330,13 @@ extern "C" {
     ///
     /// * `simulation_handle`: Simulation to pull a static's state from.
     /// * `static_handle`: Static handle to pull data about.
-    pub fn ApplyStaticDescription(
+    #[link_name = "Simulation.ApplyStaticDescription"]
+    pub fn apply_static_description(
         simulation_handle: SimulationHandle,
         static_handle: StaticHandle,
         description: StaticDescription,
     );
+
     /// Steps the simulation forward a single time.
     ///
     /// # Arguments
@@ -305,9 +344,11 @@ extern "C" {
     /// * `simulation_handle`: Handle of the simulation to step.
     /// * `dt`: Duration of the timestep.
     /// * `thread_dispatcher_handle`: Handle of the thread dispatcher to use, if any. Can be a null reference.
-    pub fn Timestep(
+    #[link_name = "Simulation.Timestep"]
+    pub fn timestep(
         simulation_handle: SimulationHandle,
         dt: f32,
+        callback: *mut (),
         thread_dispatcher_handle: ThreadDispatcherHandle,
     );
     /// Grabs a collidable's bounding boxes in the broad phase.
@@ -318,7 +359,8 @@ extern "C" {
     /// * `body_handle`: Body to pull bounding box data about.
     /// * `min`: Minimum bounds of the collidable's bounding box.
     /// * `max`: Maximum bounds of the collidable's bounding box.
-    pub fn GetBodyBoundingBoxInBroadPhase(
+    #[link_name = "Simulation.GetBodyBoundingBoxInBroadPhase"]
+    pub fn get_body_bounding_box_in_broad_phase(
         simulation_handle: SimulationHandle,
         body_handle: BodyHandle,
         min: *mut Vector3,
@@ -332,7 +374,8 @@ extern "C" {
     /// * `static_handle`: Static to pull bounding box data about.
     /// * `min`: Minimum bounds of the collidable's bounding box.
     /// * `max`: Maximum bounds of the collidable's bounding box.
-    pub fn GetStaticBoundingBoxInBroadPhase(
+    #[link_name = "Simulation.GetStaticBoundingBoxInBroadPhase"]
+    pub fn get_static_bounding_box_in_broad_phase(
         simulation_handle: SimulationHandle,
         static_handle: StaticHandle,
         min: *mut Vector3,
@@ -348,7 +391,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The buffer returned by this function can be invalidated if the simulation resizes it.
-    pub fn GetBodyHandleToLocationMapping(
+    #[link_name = "Simulation.GetBodyHandleToLocationMappings"]
+    pub fn get_body_handle_to_location_mapping(
         simulation_handle: SimulationHandle,
         body_handle_to_index_mapping: *mut Buffer<BodyMemoryLocation>,
     );
@@ -362,7 +406,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The buffer returned by this function can be invalidated if the simulation resizes it.
-    pub fn GetBodySets(simulation_handle: SimulationHandle, body_sets: *mut Buffer<BodySet>);
+    #[link_name = "Simulation.GetBodySets"]
+    pub fn get_body_sets(simulation_handle: SimulationHandle, body_sets: *mut Buffer<BodySet>);
     /// Gets the mapping from body handles to the body's location in storage.
     ///
     /// # Arguments
@@ -373,7 +418,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The buffer returned by this function can be invalidated if the simulation resizes it.
-    pub fn GetStaticHandleToLocationMapping(
+    #[link_name = "Simulation.GetStaticHandleToLocationMapping"]
+    pub fn get_static_handle_to_location_mapping(
         simulation_handle: SimulationHandle,
         static_handle_to_index_mapping: *mut Buffer<i32>,
     );
@@ -388,7 +434,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The buffer returned by this function can be invalidated if the simulation resizes it. The count is a snapshot.
-    pub fn GetStatics(
+    #[link_name = "Simulation.GetStatics"]
+    pub fn get_statics(
         simulation_handle: SimulationHandle,
         statics: *mut Buffer<Static>,
         count: *mut i32,
@@ -403,7 +450,8 @@ extern "C" {
     /// # Returns
     ///
     /// Total number of bytes allocated from native memory in this buffer pool.
-    pub fn GetAllocatedMemorySizeInPool(buffer_pool_handle: BufferPoolHandle) -> u64;
+    #[link_name = "BufferPool.GetAllocatedMemorySizeInPool"]
+    pub fn get_allocated_memory_size_in_pool(buffer_pool_handle: BufferPoolHandle) -> u64;
     /// Computes the total number of bytes allocated from native memory in a dispatcher's per-thread pools.
     /// Includes allocated memory regardless of whether it currently has outstanding references.
     ///
@@ -414,7 +462,8 @@ extern "C" {
     /// # Returns
     ///
     /// Total number of bytes allocated from native memory in this thread dispatcher's per-thread pool.
-    pub fn GetAllocatedMemorySizeInThreadDispatcher(
+    #[link_name = "ThreadDispatcher.GetAllocatedMemorySize"]
+    pub fn get_allocated_memory_size_in_thread_dispatcher(
         thread_dispatcher_handle: ThreadDispatcherHandle,
     ) -> u64;
     /// Estimates the number of bytes managed by the garbage collector.
@@ -422,49 +471,56 @@ extern "C" {
     /// # Returns
     ///
     /// Estimated number of bytes allocated from managed memory.
-    pub fn GetGCAllocatedMemorySize() -> u64;
+    #[link_name = "Utils.GetGCMemorySize"]
+    pub fn get_gc_allocated_memory_size() -> u64;
     /// Adds a sphere shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `sphere`: Shape to add to the simulation.
-    pub fn AddSphere(simulation_handle: SimulationHandle, sphere: Sphere) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddSphere"]
+    pub fn add_sphere(simulation_handle: SimulationHandle, sphere: Sphere) -> TypedIndex;
     /// Adds a capsule shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `capsule`: Shape to add to the simulation.
-    pub fn AddCapsule(simulation_handle: SimulationHandle, capsule: Capsule) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddCapsule"]
+    pub fn add_capsule(simulation_handle: SimulationHandle, capsule: Capsule) -> TypedIndex;
     /// Adds a box shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `box`: Shape to add to the simulation.
-    pub fn AddBox(simulation_handle: SimulationHandle, box_: Box) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddBox"]
+    pub fn add_box(simulation_handle: SimulationHandle, box_: Box) -> TypedIndex;
     /// Adds a triangle shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `triangle`: Shape to add to the simulation.
-    pub fn AddTriangle(simulation_handle: SimulationHandle, triangle: Triangle) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddTriangle"]
+    pub fn add_triangle(simulation_handle: SimulationHandle, triangle: Triangle) -> TypedIndex;
     /// Adds a cylinder shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `cylinder`: Shape to add to the simulation.
-    pub fn AddCylinder(simulation_handle: SimulationHandle, cylinder: Cylinder) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddCylinder"]
+    pub fn add_cylinder(simulation_handle: SimulationHandle, cylinder: Cylinder) -> TypedIndex;
     /// Adds a convex hull shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `convex_hull`: Shape to add to the simulation.
-    pub fn AddConvexHull(
+    #[link_name = "Simulation.Shapes.AddConvexHull"]
+    pub fn add_convex_hull(
         simulation_handle: SimulationHandle,
         convex_hull: ConvexHull,
     ) -> TypedIndex;
@@ -474,14 +530,16 @@ extern "C" {
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `big_compound`: Shape to add to the simulation.
-    pub fn AddCompound(simulation_handle: SimulationHandle, big_compound: Compound) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddCompound"]
+    pub fn add_compound(simulation_handle: SimulationHandle, big_compound: Compound) -> TypedIndex;
     /// Adds a big compound shape to the simulation.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `big_compound`: Shape to add to the simulation.
-    pub fn AddBigCompound(
+    #[link_name = "Simulation.Shapes.AddBigCompound"]
+    pub fn add_big_compound(
         simulation_handle: SimulationHandle,
         big_compound: BigCompound,
     ) -> TypedIndex;
@@ -491,14 +549,16 @@ extern "C" {
     ///
     /// * `simulation_handle`: Handle of the simulation to add the shape to.
     /// * `mesh`: Shape to add to the simulation.
-    pub fn AddMesh(simulation_handle: SimulationHandle, mesh: Mesh) -> TypedIndex;
+    #[link_name = "Simulation.Shapes.AddMesh"]
+    pub fn add_mesh(simulation_handle: SimulationHandle, mesh: Mesh) -> TypedIndex;
     /// Removes a shape from the simulation. Does not return any shape allocated buffers to buffer pools.
     ///
     /// # Arguments
     ///
     /// * `simulation_handle`: Handle of the simulation to remove the shape from.
     /// * `shape`: Shape to remove from the simulation.
-    pub fn RemoveShape(simulation_handle: SimulationHandle, shape: TypedIndex);
+    #[link_name = "Simulation.Shapes.RemoveShape"]
+    pub fn remove_shape(simulation_handle: SimulationHandle, shape: TypedIndex);
     /// Removes a shape from the simulation. If the shape has resources that were allocated from a buffer pool, they will be returned to the specified pool.
     ///
     /// # Arguments
@@ -510,7 +570,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The same buffer pool must be used for both allocation and deallocation.
-    pub fn RemoveAndDestroyShape(
+    #[link_name = "Simulation.Shapes.RemoveAndDestroyShape"]
+    pub fn remove_and_destroy_shape(
         simulation_handle: SimulationHandle,
         buffer_pool_handle: BufferPoolHandle,
         shape: TypedIndex,
@@ -526,7 +587,8 @@ extern "C" {
     /// # Remarks
     ///
     /// The same buffer pool must be used for both allocation and deallocation.
-    pub fn RemoveAndDestroyShapeRecursively(
+    #[link_name = "Simulation.Shapes.RemoveAndDestroyShapeRecursively"]
+    pub fn remove_and_destroy_shape_recursively(
         simulation_handle: SimulationHandle,
         buffer_pool_handle: BufferPoolHandle,
         shape: TypedIndex,
@@ -538,7 +600,8 @@ extern "C" {
     /// * `buffer_pool_handle`: Buffer pool to allocate resources from for the compound's acceleration structures.
     /// * `points`: Points in the convex hull.
     /// * `center_of_mass`: Center of mass computed for the hull and subtracted from all the points in the points used for the final shape.
-    pub fn CreateConvexHull(
+    #[link_name = "Simulation.Shapes.CreateConvexHull"]
+    pub fn create_convex_hull(
         buffer_pool_handle: BufferPoolHandle,
         points: Buffer<Vector3>,
         center_of_mass: *mut Vector3,
@@ -549,14 +612,16 @@ extern "C" {
     ///
     /// * `buffer_pool_handle`: Buffer pool to return resources to. Must be the same pool that resources were allocated from.
     /// * `convex_hull`: Convex hull to destroy.
-    pub fn DestroyConvexHull(buffer_pool_handle: BufferPoolHandle, convex_hull: *mut ConvexHull);
+    #[link_name = "Simulation.Shapes.DestroyConvexHull"]
+    pub fn destroy_convex_hull(buffer_pool_handle: BufferPoolHandle, convex_hull: *mut ConvexHull);
     /// Returns buffers allocated for a compound shape.
     ///
     /// # Arguments
     ///
     /// * `buffer_pool_handle`: Buffer pool to return resources to. Must be the same pool that resources were allocated from.
     /// * `compound`: Compound to destroy.
-    pub fn DestroyCompound(buffer_pool_handle: BufferPoolHandle, compound: *mut Compound);
+    #[link_name = "Simulation.Shapes.DestroyCompound"]
+    pub fn destroy_compound(buffer_pool_handle: BufferPoolHandle, compound: *mut Compound);
     /// Creates a big compound shape from a list of children.
     ///
     /// # Arguments
@@ -564,7 +629,8 @@ extern "C" {
     /// * `simulation_handle`: Handle of the simulation to which the shapes referenced by the compound children belong.
     /// * `buffer_pool_handle`: Buffer pool to allocate resources from for the compound's acceleration structures.
     /// * `children`: Children of the compound.
-    pub fn CreateBigCompound(
+    #[link_name = "Simulation.Shapes.CreateBigCompound"]
+    pub fn create_big_compound(
         simulation_handle: SimulationHandle,
         buffer_pool_handle: BufferPoolHandle,
         children: Buffer<CompoundChild>,
@@ -575,7 +641,11 @@ extern "C" {
     ///
     /// * `buffer_pool_handle`: Buffer pool to return resources to. Must be the same pool that resources were allocated from.
     /// * `big_compound`: Big compound to destroy.
-    pub fn DestroyBigCompound(buffer_pool_handle: BufferPoolHandle, big_compound: *mut BigCompound);
+    #[link_name = "Simulation.Shapes.DestroyBigCompound"]
+    pub fn destroy_big_compound(
+        buffer_pool_handle: BufferPoolHandle,
+        big_compound: *mut BigCompound,
+    );
     /// Creates a mesh shape from triangles.
     ///
     /// # Arguments
@@ -587,7 +657,8 @@ extern "C" {
     /// # Remarks
     ///
     /// This uses a pretty old sweep builder. Large meshes will take a while. There are ways to do this much faster if required; see https://github.com/bepu/bepuphysics2/blob/master/Demos/DemoMeshHelper.cs#L186.
-    pub fn CreateMesh(
+    #[link_name = "Mesh.Create"]
+    pub fn create_mesh(
         buffer_pool_handle: BufferPoolHandle,
         triangles: Buffer<Triangle>,
         scale: Vector3,
@@ -598,7 +669,8 @@ extern "C" {
     ///
     /// * `buffer_pool_handle`: Buffer pool to return resources to. Must be the same pool that resources were allocated from.
     /// * `mesh`: Mesh to destroy.
-    pub fn DestroyMesh(buffer_pool_handle: BufferPoolHandle, mesh: *mut Mesh);
+    #[link_name = "Mesh.Destroy"]
+    pub fn destroy_mesh(buffer_pool_handle: BufferPoolHandle, mesh: *mut Mesh);
     /// Computes the inertia of a sphere.
     ///
     /// # Arguments
@@ -609,7 +681,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeSphereInertia(sphere: Sphere, mass: f32) -> BodyInertia;
+    #[link_name = "Sphere.ComputeInertia"]
+    pub fn compute_sphere_inertia(sphere: Sphere, mass: f32) -> BodyInertia;
     /// Computes the inertia of a capsule.
     ///
     /// # Arguments
@@ -620,7 +693,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeCapsuleInertia(capsule: Capsule, mass: f32) -> BodyInertia;
+    #[link_name = "Capsule.ComputeInertia"]
+    pub fn compute_capsule_inertia(capsule: Capsule, mass: f32) -> BodyInertia;
     /// Computes the inertia of a box.
     ///
     /// # Arguments
@@ -631,7 +705,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeBoxInertia(box_: Box, mass: f32) -> BodyInertia;
+    #[link_name = "Box.ComputeInertia"]
+    pub fn compute_box_inertia(box_: Box, mass: f32) -> BodyInertia;
     /// Computes the inertia of a triangle.
     ///
     /// # Arguments
@@ -642,7 +717,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeTriangleInertia(triangle: Triangle, mass: f32) -> BodyInertia;
+    #[link_name = "Triangle.ComputeInertia"]
+    pub fn compute_triangle_inertia(triangle: Triangle, mass: f32) -> BodyInertia;
     /// Computes the inertia of a cylinder.
     ///
     /// # Arguments
@@ -653,7 +729,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeCylinderInertia(cylinder: Cylinder, mass: f32) -> BodyInertia;
+    #[link_name = "Cylinder.ComputeInertia"]
+    pub fn compute_cylinder_inertia(cylinder: Cylinder, mass: f32) -> BodyInertia;
     /// Computes the inertia of a convex hull.
     ///
     /// # Arguments
@@ -664,7 +741,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape.
-    pub fn ComputeConvexHullInertia(convex_hull: ConvexHull, mass: f32) -> BodyInertia;
+    #[link_name = "ConvexHull.ComputeInertia"]
+    pub fn compute_convex_hull_inertia(convex_hull: ConvexHull, mass: f32) -> BodyInertia;
     /// Computes the inertia of a convex.
     ///
     /// # Arguments
@@ -675,7 +753,8 @@ extern "C" {
     /// # Returns
     ///
     /// Inertia of the shape. If the shape index was not a convex, this returns a zeroed inverse inertia tensor.
-    pub fn ComputeConvexInertia(
+    #[link_name = "Simulation.Shapes.ComputeConvexInertia"]
+    pub fn compute_convex_inertia(
         simulation_handle: SimulationHandle,
         convex: TypedIndex,
         mass: f32,
@@ -687,7 +766,8 @@ extern "C" {
     /// * `simulation_handle`: Handle of the simulation to which the shapes referenced by the compound children belong.
     /// * `children`: Children of the compound.
     /// * `child_masses`: Masses of the children composing the compound.
-    pub fn ComputeCompoundInertia(
+    #[link_name = "Simulation.Shapes.ComputeCompoundInertia"]
+    pub fn compute_compound_inertia(
         simulation_handle: SimulationHandle,
         children: Buffer<CompoundChild>,
         child_masses: Buffer<f32>,
@@ -700,7 +780,8 @@ extern "C" {
     /// * `children`: Children of the compound.
     /// * `child_masses`: Masses of the children composing the compound.
     /// * `center_of_mass`: Computed center of mass that was subtracted from the position of compound children.
-    pub fn ComputeCompoundInertiaWithRecentering(
+    #[link_name = "Simulation.Shapes.ComputeCompoundInertiaWithRecentering"]
+    pub fn compute_compound_inertia_with_recentering(
         simulation_handle: SimulationHandle,
         children: Buffer<CompoundChild>,
         child_masses: Buffer<f32>,
@@ -712,21 +793,24 @@ extern "C" {
     ///
     /// * `mesh`: Mesh to compute the inertia of.
     /// * `mass`: Mass of the mesh.
-    pub fn ComputeOpenMeshInertia(mesh: Mesh, mass: f32) -> BodyInertia;
+    #[link_name = "Mesh.ComputeOpenInertia"]
+    pub fn compute_open_mesh_inertia(mesh: Mesh, mass: f32) -> BodyInertia;
     /// Computes the inertia associated with a mesh by treating it as a closed volume. Does not recenter the triangles on a computed center of mass.
     ///
     /// # Arguments
     ///
     /// * `mesh`: Mesh to compute the inertia of.
     /// * `mass`: Mass of the mesh.
-    pub fn ComputeClosedMeshInertia(mesh: Mesh, mass: f32) -> BodyInertia;
+    #[link_name = "Mesh.ComputeClosedInertia"]
+    pub fn compute_closed_mesh_inertia(mesh: Mesh, mass: f32) -> BodyInertia;
     /// Computes the inertia associated with a mesh by treating its triangles as a soup with no volume. Recenters all children onto the computed local center of mass.
     ///
     /// # Arguments
     ///
     /// * `mesh`: Mesh to compute the inertia of.
     /// * `mass`: Mass of the mesh.
-    pub fn ComputeOpenMeshInertiaWithRecentering(
+    #[link_name = "Mesh.ComputeOpenInertiaWithRecentering"]
+    pub fn compute_open_mesh_inertia_with_recentering(
         mesh: Mesh,
         mass: f32,
         center_of_mass: *mut Vector3,
@@ -737,7 +821,8 @@ extern "C" {
     ///
     /// * `mesh`: Mesh to compute the inertia of.
     /// * `mass`: Mass of the mesh.
-    pub fn ComputeClosedMeshInertiaWithRecentering(
+    #[link_name = "Mesh.ComputeClosedInertiaWithRecentering"]
+    pub fn compute_closed_mesh_inertia_with_recentering(
         mesh: Mesh,
         mass: f32,
         center_of_mass: *mut Vector3,
@@ -752,7 +837,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetSphereShapeData(
+    #[link_name = "Simulation.Shapes.GetSphereData"]
+    pub fn get_sphere_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut Sphere;
@@ -766,7 +852,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetCapsuleShapeData(
+    #[link_name = "Simulation.Shapes.GetCapsuleData"]
+    pub fn get_capsule_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut Capsule;
@@ -780,7 +867,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetBoxShapeData(simulation_handle: SimulationHandle, shape: TypedIndex) -> *mut Box;
+    #[link_name = "Simulation.Shapes.GetBoxData"]
+    pub fn get_box_shape_data(simulation_handle: SimulationHandle, shape: TypedIndex) -> *mut Box;
     /// Gets a pointer to a triangle shape's data stored within the simulation's shapes buffers.
     ///
     /// # Arguments
@@ -791,7 +879,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetTriangleShapeData(
+    #[link_name = "Simulation.Shapes.GetTriangleData"]
+    pub fn get_triangle_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut Triangle;
@@ -805,7 +894,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetCylinderShapeData(
+    #[link_name = "Simulation.Shapes.GetCylinderData"]
+    pub fn get_cylinder_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut Cylinder;
@@ -819,7 +909,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetConvexHullShapeData(
+    #[link_name = "Simulation.Shapes.GetConvexHullData"]
+    pub fn get_convex_hull_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut ConvexHull;
@@ -833,7 +924,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetCompoundShapeData(
+    #[link_name = "Simulation.Shapes.GetCompoundData"]
+    pub fn get_compound_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut Compound;
@@ -847,7 +939,8 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetBigCompoundShapeData(
+    #[link_name = "Simulation.Shapes.GetBigCompoundData"]
+    pub fn get_big_compound_shape_data(
         simulation_handle: SimulationHandle,
         shape: TypedIndex,
     ) -> *mut BigCompound;
@@ -861,5 +954,7 @@ extern "C" {
     /// # Returns
     ///
     /// Pointer to the shape's data in the simulation's shapes buffers.
-    pub fn GetMeshShapeData(simulation_handle: SimulationHandle, shape: TypedIndex) -> *mut Mesh;
+    #[link_name = "Simulation.Shapes.GetMeshData"]
+    pub fn get_mesh_shape_data(simulation_handle: SimulationHandle, shape: TypedIndex)
+        -> *mut Mesh;
 }

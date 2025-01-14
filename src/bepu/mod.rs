@@ -14,6 +14,15 @@ pub mod utilities;
 
 pub mod functions;
 
+#[cfg(target_feature = "avx512f")]
+pub const WIDEST_LANE: usize = 16;
+
+#[cfg(all(target_feature = "sse2", not(target_feature = "avx512f")))]
+pub const WIDEST_LANE: usize = 8;
+
+#[cfg(not(any(target_feature = "avx512f", target_feature = "sse2")))]
+pub const WIDEST_LANE: usize = 4; // Fallback for systems without AVX512F or SSE2
+
 #[repr(C)]
 pub enum SIMDWidth {
     SIMD128,

@@ -1,7 +1,12 @@
+use std::simd::LaneCount;
+use std::simd::Simd;
+use std::simd::SupportedLaneCount;
+
 use super::handles::*;
 use super::interop_math::*;
 use super::tree::*;
 use super::utilities::*;
+use super::WIDEST_LANE;
 
 /// Shape type enum.
 #[repr(C)]
@@ -86,7 +91,14 @@ pub struct HullVertexIndex {
 /// Dummy type standing in for the compile time variable width `Vector3Wide` type.
 /// Pointers to buffers of this type should be reinterpreted to either `Vector3SIMD128` or `Vector3SIMD256` depending on what SIMD width is in use.
 #[repr(C)]
-pub struct Vector3Wide;
+pub struct Vector3Wide<const N: usize>
+where
+    LaneCount<N>: SupportedLaneCount,
+{
+    pub x: Simd<f32, N>,
+    pub y: Simd<f32, N>,
+    pub z: Simd<f32, N>,
+}
 
 /// Dummy type standing in for the compile time variable width `HullBoundingPlanes` type.
 /// Pointers to buffers of this type should be reinterpreted to either `HullBoundingPlanesSIMD128` or `HullBoundingPlanesSIMD256` depending on what SIMD width is in use.
@@ -109,7 +121,7 @@ pub struct HullBoundingPlanesSIMD256 {
 #[repr(C)]
 pub struct ConvexHull {
     /// Bundled points of the convex hull.
-    pub points: Buffer<Vector3Wide>,
+    pub points: Buffer<Vector3Wide<WIDEST_LANE>>,
     /// Bundled bounding planes associated with the convex hull's faces.
     pub bounding_planes: Buffer<HullBoundingPlanes>,
     /// Combined set of vertices used by each face. Use `face_to_vertex_indices_start` to index into this for a particular face. Indices stored in counterclockwise winding in right handed space, clockwise in left handed space.

@@ -29,10 +29,10 @@ impl<T> CollidableProperty<T> {
     pub fn new(simulation: SimulationHandle, pool: BufferPoolHandle) -> Self {
         let mut body_handle_to_location_mapping = Buffer::<BodyMemoryLocation>::new();
         unsafe {
-            GetBodyHandleToLocationMapping(simulation, &mut body_handle_to_location_mapping);
+            get_body_handle_to_location_mapping(simulation, &mut body_handle_to_location_mapping);
         }
         let body_data = unsafe {
-            AllocateAtLeast(
+            allocate_at_least(
                 pool,
                 body_handle_to_location_mapping.len * std::mem::size_of::<T>() as i32,
             )
@@ -40,10 +40,10 @@ impl<T> CollidableProperty<T> {
 
         let mut static_handle_to_index_mapping = Buffer::<i32>::new();
         unsafe {
-            GetStaticHandleToLocationMapping(simulation, &mut static_handle_to_index_mapping);
+            get_static_handle_to_location_mapping(simulation, &mut static_handle_to_index_mapping);
         }
         let static_data = unsafe {
-            AllocateAtLeast(
+            allocate_at_least(
                 pool,
                 static_handle_to_index_mapping.len * std::mem::size_of::<T>() as i32,
             )
@@ -68,7 +68,7 @@ impl<T> CollidableProperty<T> {
                 id: self.body_data.id,
             };
             unsafe {
-                ResizeToAtLeast(
+                resize_to_at_least(
                     self.pool,
                     &mut byte_buffer,
                     target_capacity_in_bytes as i32,
@@ -91,7 +91,7 @@ impl<T> CollidableProperty<T> {
                 id: self.static_data.id,
             };
             unsafe {
-                ResizeToAtLeast(
+                resize_to_at_least(
                     self.pool,
                     &mut byte_buffer,
                     target_capacity_in_bytes as i32,
@@ -119,7 +119,7 @@ impl<T> CollidableProperty<T> {
                 id: self.body_data.id,
             };
             unsafe {
-                ResizeToAtLeast(
+                resize_to_at_least(
                     self.pool,
                     &mut byte_buffer,
                     capacity * std::mem::size_of::<T>() as i32,
@@ -137,7 +137,7 @@ impl<T> CollidableProperty<T> {
                 id: self.static_data.id,
             };
             unsafe {
-                ResizeToAtLeast(
+                resize_to_at_least(
                     self.pool,
                     &mut byte_buffer,
                     capacity * std::mem::size_of::<T>() as i32,
@@ -151,8 +151,8 @@ impl<T> CollidableProperty<T> {
     /// Returns all held resources.
     pub fn dispose(self) {
         unsafe {
-            DeallocateById(self.pool, self.body_data.id);
-            DeallocateById(self.pool, self.static_data.id);
+            deallocate_by_id(self.pool, self.body_data.id);
+            deallocate_by_id(self.pool, self.static_data.id);
         }
     }
 }
